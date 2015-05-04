@@ -26,6 +26,10 @@ rescue  Cute::G5K::EventTimeout
   g5k.release(job)
 end
 
+puts "Downloading NAS script"
+
+`wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/deploy_NAS_on_cluster.rb`
+
 kernel_versions = ["3.2","3.16","4.0"]
 
 kernel_versions.each do |kernel|
