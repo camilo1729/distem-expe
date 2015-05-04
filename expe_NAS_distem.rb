@@ -48,4 +48,4 @@ vnodes_tests.each{ |vnodes|
 }
 
 puts "Getting the results"
-`rsync -a root@CORD:~/ .`
+`rsync -a root@#{CORD}:~/ .`
