@@ -37,7 +37,7 @@ vnodes_tests.each{ |vnodes|
     lines = ssh.exec!("wc -l machine_file")
     num_nodes = lines.split(" ").first
     10.times.each{
-      puts ssh.exec!("ruby deploy_NAS_on_cluser.rb #{num_nodes}")
+      puts ssh.exec!("ruby deploy_NAS_on_cluster.rb #{num_nodes}")
       puts "waiting for the next execution"
       sleep(5)
     }
