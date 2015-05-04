@@ -19,7 +19,7 @@ g5k = Cute::G5K::API.new()
 job = g5k.reserve(:site => "rennes", :switches => 1, :nodes => NB,  :cluster => "paravance", :wait => false,
                   :walltime => "03:00:00", :type => :deploy, :name => 'distem', :subnets => [22,1],:queue => "testing")#,:vlan => :routed)
 begin
-  job = g5k.wait_for_job(job, :wait_time => 200)
+  job = g5k.wait_for_job(job, :wait_time => 7200)
   puts "Nodes assigned #{job['assigned_nodes']}"
 rescue  Cute::G5K::EventTimeout
   puts "We waited too long in site let's release the job and try in another site"
