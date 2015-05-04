@@ -84,6 +84,7 @@ kernel_versions.each do |kernel|
   Net::SSH::Multi.start do |session|
     nodelist.each{ |node| session.use("root@#{node}")}
     session.exec! "cat .ssh/id_rsa.pub >> .ssh/authorized_keys"
+    puts session.exec! "uname -a"
   end
 
 
