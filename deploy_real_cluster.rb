@@ -90,7 +90,7 @@ kernel_versions.each do |kernel|
 
 # running NAS benchmark
   20.times.each{
-    `ruby deploy_NAS_on_real.rb #{nodelist.length}`
+    `ruby deploy_NAS_on_cluster.rb #{nodelist.length}`
     sleep(5)
   }
 
