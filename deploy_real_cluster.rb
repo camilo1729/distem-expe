@@ -52,13 +52,13 @@ kernel_versions.each do |kernel|
   end
 
   nodelist = job['assigned_nodes'].uniq
-  badnodes = check_cpu_performance(nodelist)
+  badnodes = check_cpu_performance(nodelist,18)
 
   while not badnodes.empty? do
     puts "Redeploying nodes because of performance #{badnodes}"
     g5k.deploy(job,:nodes => badnodes, :env => "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml")
     g5k.wait_for_deploy(job)
-    badnodes = check_cpu_performance(nodelist)
+    badnodes = check_cpu_performance(nodelist,18)
   end
 
 

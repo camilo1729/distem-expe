@@ -10,7 +10,7 @@ def check_cpu_performance(machines,ref_value)
     session.exec! ""
     session.exec! "DEBIAN_FRONTEND=noninteractive apt-get install -q -y sysbench"
     results = session.exec! "sysbench --num-threads=16 --test=cpu run --cpu-max-prime=100000 | grep \"execution time\" | awk '{print $4}' | cut -d / -f 1"
-    badnodes = results.select{ |name,res| res[:output] > (ref_value +2)}
+    badnodes = results.select{ |name,res| res[:output].to_i > (ref_value +2)}
   end
   badnodes.values
 end
