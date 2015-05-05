@@ -3,6 +3,9 @@ require 'resolv'
 require 'net/scp'
 require 'cute'
 
+# useful methods
+load 'utils.rb'
+
 NB = ARGV[0].to_i
 
 
@@ -39,11 +42,27 @@ kernel_versions.each do |kernel|
   g5k.deploy(job,:env => "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml")
   g5k.wait_for_deploy(job)
 
-  puts "Generating machine file"
+  badnodes = check_deployment(job["deploy"].last)
+  # redeploying for bad nodes
+  while not badnodes.empty? do
+    puts "Redeploying nodes #{badnodes}"
+    g5k.deploy(job,:nodes => badnodes, :env => "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml")
+    g5k.wait_for_deploy(job)
+    badnodes = check_deployment(job["deploy"].last)
+  end
 
   nodelist = job['assigned_nodes'].uniq
+  badnodes = check_cpu_performance(nodelist)
+
+  while not badnodes.empty? do
+    puts "Redeploying nodes because of performance #{badnodes}"
+    g5k.deploy(job,:nodes => badnodes, :env => "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml")
+    g5k.wait_for_deploy(job)
+    badnodes = check_cpu_performance(nodelist)
+  end
 
 
+  puts "Generating machine file"
   if nodelist.length > NB then
 
     puts "Names in the nodelist are not unique exiting"
