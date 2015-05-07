@@ -14,10 +14,6 @@ optparse = OptionParser.new do |opts|
     options[:num_lxc] = n.to_i
   end
 
-  opts.on( '-p', '--number-p <number>',Integer,'Number of containers Pnodes') do |n|
-    options[:num_pn] = n.to_i
-  end
-
   opts.on('-i', '--image <path image>', String, 'Path for the container file system') do |n|
     raise "Image file does not exist" unless File.exist?(n)
     options[:image] = "file://#{File.absolute_path(n)}"
@@ -45,15 +41,13 @@ g5k = Cute::G5K::API.new(g5k_api)
 
 job = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == "distem"}.first
 
-nodes = job["assigned_nodes"]
-
-nodes = nodes[0..(options[:num_pn]-1)] if options[:num_pn]
 
 net = g5k.get_subnets(job).first
 
 vnet = {'name' => 'testnet','address' => net.to_string}
 
 nodelist = []
+
 
 Distem.client do |cl|
 
@@ -65,12 +59,14 @@ Distem.client do |cl|
 
   count = 0
 
+  pnodes = cl.pnodes_info
+
   private_key = IO.readlines('/root/.ssh/id_rsa').join
   public_key = IO.readlines('/root/.ssh/id_rsa.pub').join
 
   ssh_keys = {'private' => private_key,'public' => public_key}
 
-  nodes.each do |pnode|
+  pnodes.each do |pnode|
 
     pnode_list = []
     options[:num_lxc].times do
@@ -82,7 +78,7 @@ Distem.client do |cl|
     end
 
     res = cl.vnodes_create(pnode_list,{
-                                    'host' => pnode,
+                                    'host' => pnode["address"],
                                     'vfilesystem' =>{'image' => options[:image],'shared' => true},
                                     'vifaces' => [{'name' => 'if0', 'vnetwork' => vnet['name']}]
                                       }, ssh_keys)

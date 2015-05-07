@@ -23,12 +23,7 @@ Net::SCP.start(CORD, "root") do |scp|
   end
 end
 
-num_nodes = ARGV[0].to_i
 
-if num_nodes.nil? then
-  puts "you have to specify the number of nodes"
-  exit 1
-end
 
 vnodes_tests.each{ |vnodes|
 
@@ -37,7 +32,7 @@ vnodes_tests.each{ |vnodes|
   Net::SSH.start(CORD, 'root') do |ssh|
     puts "printing kernel version"
     puts ssh.exec!("uname -a")
-    puts ssh.exec!("ruby cluster_distem.rb -p #{num_nodes} -i #{LXC_IMAGE_PATH} -n #{vnodes} -u cruizsanabria")
+    puts ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u cruizsanabria")
     puts ssh.exec!("ruby create_machinefile.rb")
     puts "Verifying connectivity"
     puts ssh.exec!("for i in $(cat machine_file); do ssh $i hostname; done")
