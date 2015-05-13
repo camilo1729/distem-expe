@@ -1,0 +1,12 @@
+---
+benchs:
+- :type: lu
+  :class: C
+- :type: cg
+  :class: C
+- :type: ep
+  :class: C
+- :type: ft
+  :class: C
+- :type: is
+  :class: C
