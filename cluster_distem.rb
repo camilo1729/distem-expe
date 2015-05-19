@@ -27,7 +27,7 @@ optparse = OptionParser.new do |opts|
     options[:cpu_ratio] = n
   end
 
-  opts.on('-n', '--nbcores <number>', Integer, 'Specifies the number of cores per vnode') do |n|
+  opts.on('-c', '--nbcores <number>', Integer, 'Specifies the number of cores per vnode') do |n|
     options[:nbcores] = n
   end
 
