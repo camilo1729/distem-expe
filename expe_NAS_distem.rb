@@ -23,6 +23,7 @@ Net::SCP.start(CORD, "root") do |scp|
     `wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/#{script}`
     scp.upload script, script
   end
+  scp.upload "expe_metadata.yaml", "expe_metadata.yaml"
 end
 
 
