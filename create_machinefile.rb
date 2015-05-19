@@ -2,7 +2,7 @@
 
 require 'distem'
 
-NBCORES = ARGV[0] || 1
+NBCORES = ARGV[0].to_i || 1
 
 iplist = []
 Distem.client do |cl|
