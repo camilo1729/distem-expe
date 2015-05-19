@@ -23,8 +23,12 @@ optparse = OptionParser.new do |opts|
     options[:user] = n
   end
 
-  opts.on('-c', '--cpu <ratio>', String, 'Degrades CPU the ratio specified') do |n|
+  opts.on('-r', '--cpu-ratio <ratio>', String, 'Degrades CPU the ratio specified') do |n|
     options[:cpu_ratio] = n
+  end
+
+  opts.on('-n', '--nbcores <number>', Integer, 'Specifies the number of cores per vnode') do |n|
+    options[:nbcores] = n
   end
 
 end
@@ -88,7 +92,7 @@ Distem.client do |cl|
 
   if options[:cpu_ratio] then
     nodelist.each{ |vnode|
-      cl.vcpu_create(vnode, :cpu_ratio, 'ratio', 1)
+      cl.vcpu_create(vnode, options[:cpu_ratio], 'ratio', options[:nbcores])
     }
   end
 
