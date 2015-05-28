@@ -4,7 +4,7 @@ require 'resolv'
 require 'net/scp'
 require 'cute'
 
-CORD = ""
+CORD = ARGV[0]
 
 home = ENV['HOME']
 g5k_user = ENV['USER']
