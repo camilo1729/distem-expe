@@ -19,8 +19,20 @@ end
 
 g5k = Cute::G5K::API.new()
 
-job = g5k.reserve(:site => "rennes", :switches => 1, :nodes => NB,  :cluster => "paravance", :wait => false,
-                  :walltime => "03:00:00", :type => :deploy, :name => 'distem', :subnets => [22,1],:queue => "testing")#,:vlan => :routed)
+reserv_parms = {:site => "rennes",
+                :switches => 1,
+                :nodes => NB,
+                :cluster => "paravance",
+                :wait => false,
+                :walltime => "03:00:00",
+                :type => :deploy, :name => 'distem',
+                :subnets => [22,1],:queue => "testing"}#,:vlan => :routed)
+
+# In case we have already a reservation
+old_jobs = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == "distem"}
+
+job = old_jobs.empty? ? g5k.reserve(reserv_param) : old_jobs.first
+
 begin
   job = g5k.wait_for_job(job, :wait_time => 7200)
   puts "Nodes assigned #{job['assigned_nodes']}"
@@ -108,10 +120,7 @@ kernel_versions.each do |kernel|
 
 
 # running NAS benchmark
-  20.times.each{
-    `ruby deploy_NAS_on_cluster.rb #{nodelist.length}`
-    sleep(5)
-  }
+  `ruby deploy_NAS_on_cluster.rb #{nodelist.length} 20`
 
   `mkdir -p results_kernel_#{kernel}`
   `mv profile-* results_kernel_#{kernel}/`
