@@ -9,6 +9,9 @@ load 'utils.rb'
 NB = ARGV[0].to_i
 
 
+DISTEM_BOOTSTRAP_PATH="~/Repositories/ruby-cute/examples/"
+
+
 if NB.nil? then
 
   puts "You need to specify the number of nodes"
@@ -51,14 +54,15 @@ kernel_versions.each do |kernel|
 
   puts "Testing with kernel version #{kernel}"
 
-  g5k.deploy(job,:env => "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml")
+  jessie_env = "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml"
+  g5k.deploy(job,:env => jessie_env)
   g5k.wait_for_deploy(job)
 
   badnodes = check_deployment(job["deploy"].last)
   # redeploying for bad nodes
   while not badnodes.empty? do
     puts "Redeploying nodes #{badnodes}"
-    g5k.deploy(job,:nodes => badnodes, :env => "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml")
+    g5k.deploy(job,:nodes => badnodes, :env => jessie_env)
     g5k.wait_for_deploy(job)
     badnodes = check_deployment(job["deploy"].last)
   end
@@ -124,4 +128,9 @@ kernel_versions.each do |kernel|
 
   `mkdir -p results_kernel_#{kernel}`
   `mv profile-* results_kernel_#{kernel}/`
+
+
+# now Install Distem into the nodes
+  `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{nodelist.first} --env #{jessie_env} -g --debian-version jessie`
+  `ruby expe_NAS_distem.rb #{nodelist.first}`
 end
