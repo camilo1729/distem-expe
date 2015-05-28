@@ -126,11 +126,14 @@ kernel_versions.each do |kernel|
 # running NAS benchmark
   `ruby deploy_NAS_on_cluster.rb #{nodelist.length} 20`
 
-  `mkdir -p results_kernel_#{kernel}`
-  `mv profile-* results_kernel_#{kernel}/`
+  `mkdir -p real_k#{kernel}`
+  `mv profile-* real_k#{kernel}/`
 
 
 # now Install Distem into the nodes
   `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{nodelist.first} --env #{jessie_env} -g --debian-version jessie`
   `ruby expe_NAS_distem.rb #{nodelist.first}`
+
+  `mkdir -p distem_k#{kernel}`
+  `mv profile-* distem_k#{kernel}/`
 end
