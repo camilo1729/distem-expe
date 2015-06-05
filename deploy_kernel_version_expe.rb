@@ -103,9 +103,9 @@ kernel_versions.each do |kernel|
 
   ssh_conf = Tempfile.new('config')
   File.open(ssh_conf.path,'w+') do |f|
-    f.log.info "Host *"
-    f.log.info "StrictHostKeyChecking no"
-    f.log.info "UserKnownHostsFile=/dev/null "
+    f.puts "Host *"
+    f.puts "StrictHostKeyChecking no"
+    f.puts "UserKnownHostsFile=/dev/null "
   end
 
 
