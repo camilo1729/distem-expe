@@ -4,6 +4,7 @@ require 'resolv'
 require 'net/scp'
 require 'cute'
 
+load 'utils.rb'
 CORD = ARGV[0]
 CORES = ARGV[1]
 
@@ -14,8 +15,13 @@ vnodes_tests = [1, 2, 4, 8]
 
 LXC_IMAGE_PATH = "/home/cruizsanabria/jessie-tau-lxc.tar.gz"
 
-puts "Downloading necessary scripts"
+log_file = File.open("Distem_expe.log", "a")
+log = Logger.new MultiIO.new(STDOUT, log_file)
+
+
+log.info "Downloading necessary scripts"
 expe_scripts = ["create_machinefile.rb","cluster_distem.rb","delete_cluster.rb","deploy_NAS_on_cluster.rb"]
+
 
 
 Net::SCP.start(CORD, "root") do |scp|
@@ -30,28 +36,28 @@ end
 
 vnodes_tests.each{ |vnodes|
 
-  puts "Creating cluster #{vnodes} vnodes per pnode"
+  log.info "Creating cluster #{vnodes} vnodes per pnode"
   Net::SSH.start(CORD, 'root') do |ssh|
-    puts "printing kernel version"
-    puts ssh.exec!("uname -a")
+    log.info "printing kernel version"
+    log.info ssh.exec!("uname -a")
 
     if CORES > 0 then
-      puts ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user} -r 1 -c #{CORES}")
+      log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user} -r 1 -c #{CORES}")
     else
-      puts ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user}")
+      log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user}")
     end
 
-    puts ssh.exec!("ruby create_machinefile.rb")
-    puts "Verifying connectivity"
-    puts ssh.exec!("for i in $(cat machine_file); do ssh $i hostname; done")
+    log.info ssh.exec!("ruby create_machinefile.rb")
+    log.info "Verifying connectivity"
+    log.info ssh.exec!("for i in $(cat machine_file); do ssh $i hostname; done")
     lines = ssh.exec!("wc -l machine_file")
     num_nodes = lines.split(" ").first
-    puts ssh.exec!("ruby deploy_NAS_on_cluster.rb #{num_nodes} 20")
-    puts "Deleting cluster"
-    puts ssh.exec!("ruby delete_cluster.rb")
+    log.info ssh.exec!("ruby deploy_NAS_on_cluster.rb #{num_nodes} 20")
+    log.info "Deleting cluster"
+    log.info ssh.exec!("ruby delete_cluster.rb")
   end
 
 }
 
-puts "Getting the results"
+log.info "Getting the results"
 `rsync -a root@#{CORD}:~/ .`

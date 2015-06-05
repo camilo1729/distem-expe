@@ -44,7 +44,11 @@ rescue  Cute::G5K::EventTimeout
   g5k.release(job)
 end
 
-puts "Downloading NAS script"
+log_file = File.open("Distem_expe.log", "a")
+log = Logger.new MultiIO.new(STDOUT, log_file)
+
+
+log.info "Downloading NAS script"
 
 `wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/deploy_NAS_on_cluster.rb`
 
@@ -52,7 +56,7 @@ kernel_versions = ["3.2","3.16","4.0"]
 
 kernel_versions.each do |kernel|
 
-  puts "Testing with kernel version #{kernel}"
+  log.info "Testing with kernel version #{kernel}"
 
   jessie_env = "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml"
   g5k.deploy(job,:env => jessie_env)
@@ -61,7 +65,7 @@ kernel_versions.each do |kernel|
   badnodes = check_deployment(job["deploy"].last)
   # redeploying for bad nodes
   while not badnodes.empty? do
-    puts "Redeploying nodes #{badnodes}"
+    log.info "Redeploying nodes #{badnodes}"
     g5k.deploy(job,:nodes => badnodes, :env => jessie_env)
     g5k.wait_for_deploy(job)
     badnodes = check_deployment(job["deploy"].last)
@@ -71,17 +75,17 @@ kernel_versions.each do |kernel|
   badnodes = check_cpu_performance(nodelist,18)
 
   while not badnodes.empty? do
-    puts "Redeploying nodes because of performance #{badnodes}"
+    log.info "Redeploying nodes because of performance #{badnodes}"
     g5k.deploy(job,:nodes => badnodes, :env => "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml")
     g5k.wait_for_deploy(job)
     badnodes = check_cpu_performance(nodelist,18)
   end
 
 
-  puts "Generating machine file"
+  log.info "Generating machine file"
   if nodelist.length > NB then
 
-    puts "Names in the nodelist are not unique exiting"
+    log.info "Names in the nodelist are not unique exiting"
     exit
 
   end
@@ -89,26 +93,26 @@ kernel_versions.each do |kernel|
   nodelist.map!{|node| Resolv.getaddress node}
 
   File.open("machine_file",'w+') do |f|
-    nodelist.each{ |node| f.puts node }
+    nodelist.each{ |node| f.log.info node }
   end
 
   key_dir = Dir.mktmpdir("keys")
   system "ssh-keygen -P \'\' -f #{key_dir}/keys"
-  puts "Keys generated in #{key_dir}"
+  log.info "Keys generated in #{key_dir}"
 
 
   ssh_conf = Tempfile.new('config')
   File.open(ssh_conf.path,'w+') do |f|
-    f.puts "Host *"
-    f.puts "StrictHostKeyChecking no"
-    f.puts "UserKnownHostsFile=/dev/null "
+    f.log.info "Host *"
+    f.log.info "StrictHostKeyChecking no"
+    f.log.info "UserKnownHostsFile=/dev/null "
   end
 
 
   nodelist.each do |node|
 
     Net::SCP.start(node, "root") do |scp|
-      puts "Transfering key to #{node}"
+      log.info "Transfering key to #{node}"
       scp.upload "#{key_dir}/keys.pub", "/root/.ssh/id_rsa.pub"
       scp.upload "#{key_dir}/keys", "/root/.ssh/id_rsa"
       scp.upload ssh_conf.path, "/root/.ssh/config"
@@ -119,9 +123,10 @@ kernel_versions.each do |kernel|
   Net::SSH::Multi.start do |session|
     nodelist.each{ |node| session.use("root@#{node}")}
     session.exec! "cat .ssh/id_rsa.pub >> .ssh/authorized_keys"
-    puts session.exec! "uname -a"
+    log.info session.exec! "uname -a"
   end
 
+  log.info "Experiments will run with #{nodelist.length}"
 
 # running NAS benchmark
   `ruby deploy_NAS_on_cluster.rb #{nodelist.length} 20`
