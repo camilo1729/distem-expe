@@ -29,7 +29,7 @@ log = Logger.new MultiIO.new(STDOUT, log_file)
 
 g5k = Cute::G5K::API.new()
 
-reserv_parms = {:site => "rennes",
+reserv_param = {:site => "rennes",
                 :switches => 1,
                 :nodes => NB,
                 :cluster => "paravance",
