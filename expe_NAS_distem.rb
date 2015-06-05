@@ -5,6 +5,7 @@ require 'net/scp'
 require 'cute'
 
 CORD = ARGV[0]
+CORES = ARGV[1]
 
 home = ENV['HOME']
 g5k_user = ENV['USER']
@@ -29,12 +30,17 @@ end
 
 vnodes_tests.each{ |vnodes|
 
-
   puts "Creating cluster #{vnodes} vnodes per pnode"
   Net::SSH.start(CORD, 'root') do |ssh|
     puts "printing kernel version"
     puts ssh.exec!("uname -a")
-    puts ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user}")
+
+    if CORES > 0 then
+      puts ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user} -r 1 -c #{CORES}")
+    else
+      puts ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user}")
+    end
+
     puts ssh.exec!("ruby create_machinefile.rb")
     puts "Verifying connectivity"
     puts ssh.exec!("for i in $(cat machine_file); do ssh $i hostname; done")
