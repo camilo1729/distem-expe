@@ -71,12 +71,12 @@ end
 puts "Executing #{RUNS} runs per type of bench"
 
 
-RUNS.times{
-  Net::SSH.start(nodes.first, 'root') do |ssh|
+
+Net::SSH.start(nodes.first, 'root') do |ssh|
+  RUNS.times do
     binaries.each do |binary|
       puts "Executing binary: #{binary}"
       ssh.exec!("mpirun  --mca btl self,sm,tcp --machinefile machine_file #{binary}")
-      sleep 2
       puts "Getting the profile files"
       profile_dir = "profile-#{binary}-#{Time.now.to_i}"
       Dir.mkdir profile_dir
@@ -85,4 +85,4 @@ RUNS.times{
       end
     end
   end
-}
+end

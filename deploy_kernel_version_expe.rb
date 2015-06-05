@@ -8,10 +8,6 @@ load 'utils.rb'
 
 NB = ARGV[0].to_i
 
-
-
-
-
 if NB.nil? then
 
   puts "You need to specify the number of nodes"
@@ -29,8 +25,9 @@ log = Logger.new MultiIO.new(STDOUT, log_file)
 
 g5k = Cute::G5K::API.new()
 
+# always take the whole switch
 reserv_param = {:site => "rennes",
-                :switches => 1,
+                :switches => 1+ NB%36,
                 :nodes => NB,
                 :cluster => "paravance",
                 :wait => false,
@@ -38,7 +35,7 @@ reserv_param = {:site => "rennes",
                 :type => :deploy, :name => 'distem',
                 :subnets => [22,1],:queue => "testing"}#,:vlan => :routed)
 
-# In case we have already a reservation
+# In case we have already a reservatioin
 old_jobs = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == "distem"}
 
 job = old_jobs.empty? ? g5k.reserve(reserv_param) : old_jobs.first
@@ -96,7 +93,7 @@ kernel_versions.each do |kernel|
   nodelist.map!{|node| Resolv.getaddress node}
 
   File.open("machine_file",'w+') do |f|
-    nodelist.each{ |node| f.log.info node }
+    nodelist.each{ |node| f.puts node }
   end
 
   key_dir = Dir.mktmpdir("keys")

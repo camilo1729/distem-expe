@@ -48,6 +48,7 @@ job = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == "distem"}.first
 
 net = g5k.get_subnets(job).first
 
+## change the assigments of ipS
 vnet = {'name' => 'testnet','address' => net.to_string}
 
 nodelist = []
