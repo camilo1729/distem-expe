@@ -9,7 +9,7 @@ load 'utils.rb'
 NB = ARGV[0].to_i
 
 
-DISTEM_BOOTSTRAP_PATH="~/Repositories/ruby-cute/examples/"
+
 
 
 if NB.nil? then
@@ -17,6 +17,13 @@ if NB.nil? then
   puts "You need to specify the number of nodes"
   exit
 end
+
+## getting experiment metadata
+metadata = YAML.load(File.read("expe_metadata.yaml"))
+DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
+
+log_file = File.open(metadata["log_file"], "a")
+log = Logger.new MultiIO.new(STDOUT, log_file)
 
 # parameter subnets makes the reservation  compatible with an installation of distem
 
@@ -38,15 +45,11 @@ job = old_jobs.empty? ? g5k.reserve(reserv_param) : old_jobs.first
 
 begin
   job = g5k.wait_for_job(job, :wait_time => 7200)
-  puts "Nodes assigned #{job['assigned_nodes']}"
+  log.info "Nodes assigned #{job['assigned_nodes']}"
 rescue  Cute::G5K::EventTimeout
-  puts "We waited too long in site let's release the job and try in another site"
+  log.info "We waited too long in site let's release the job and try in another site"
   g5k.release(job)
 end
-
-log_file = File.open("Distem_expe.log", "a")
-log = Logger.new MultiIO.new(STDOUT, log_file)
-
 
 log.info "Downloading NAS script"
 

@@ -13,11 +13,13 @@ g5k_user = ENV['USER']
 
 vnodes_tests = [1, 2, 4, 8]
 
-LXC_IMAGE_PATH = "/home/cruizsanabria/jessie-tau-lxc.tar.gz"
+LXC_IMAGE_PATH = "#{home}/jessie-tau-lxc.tar.gz"
 
-log_file = File.open("Distem_expe.log", "a")
+metadata = YAML.load(File.read("expe_metadata.yaml"))
+DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
+
+log_file = File.open(metadata["log_file"], "a")
 log = Logger.new MultiIO.new(STDOUT, log_file)
-
 
 log.info "Downloading necessary scripts"
 expe_scripts = ["create_machinefile.rb","cluster_distem.rb","delete_cluster.rb","deploy_NAS_on_cluster.rb"]

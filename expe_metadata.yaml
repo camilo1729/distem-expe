@@ -1,4 +1,6 @@
 ---
+log_file: "Distem_expe.log"
+distem_bootstrap_path: "~/Repositories/ruby-cute/examples"
 benchs:
 - :type: lu
   :class: B
