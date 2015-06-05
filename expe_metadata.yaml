@@ -1,12 +1,14 @@
 ---
 benchs:
 - :type: lu
-  :class: C
+  :class: B
 - :type: cg
-  :class: C
+  :class: B
 - :type: ep
-  :class: C
+  :class: B
 - :type: ft
-  :class: C
+  :class: B
 - :type: is
+  :class: C
+- :type: mg
   :class: C
