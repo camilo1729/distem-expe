@@ -31,25 +31,20 @@ optparse = OptionParser.new do |opts|
     options[:nbcores] = n
   end
 
+  opts.on( '--net <subnetwork>', String, 'subnet work range' ) do |c|
+    options[:net] = c
+  end
+
+
 end
 
 optparse.parse!
 
 # getting job
 
-g5k_api = {:uri => "https://api.grid5000.fr/",
-           :user => options[:user],
-           :version => "sid"}
-
-g5k = Cute::G5K::API.new(g5k_api)
-
-job = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == "distem"}.first
-
-
-net = g5k.get_subnets(job).first
 
 ## change the assigments of ipS
-vnet = {'name' => 'testnet','address' => net.to_string}
+vnet = {'name' => 'testnet','address' => options[:net]}
 
 nodelist = []
 
