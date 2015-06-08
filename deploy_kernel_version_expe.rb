@@ -40,7 +40,7 @@ reserv_param = {:site => "rennes",
                 :nodes => NB,
                 :cluster => "paravance",
                 :wait => false,
-                :walltime => "03:00:00",
+                :walltime => "02:00:00",
                 :type => :deploy, :name => job_name,
                 :subnets => [18,1],:queue => "testing"}#,:vlan => :routed)
 
@@ -150,5 +150,5 @@ kernel_versions.each do |kernel|
   `ruby expe_NAS_distem.rb #{nodelist.first}`
 
   `mkdir -p distem_k#{kernel}`
-  `mv profile-* distem_k#{kernel}/`
+  `mv distem_temp/ distem_k#{kernel}/`
 end

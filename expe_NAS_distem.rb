@@ -40,7 +40,7 @@ net = g5k.get_subnets(job).first
 
 
 log.info "Downloading necessary scripts"
-expe_scripts = ["create_machinefile.rb","cluster_distem.rb","delete_cluster.rb","deploy_NAS_on_cluster.rb"]
+expe_scripts = ["utils","create_machinefile.rb","cluster_distem.rb","delete_cluster.rb","deploy_NAS_on_cluster.rb"]
 
 
 
@@ -86,4 +86,5 @@ vnodes_tests.each{ |vnodes|
 }
 
 log.info "Getting the results"
-`rsync -a root@#{CORD}:~/ .`
+`mkdir -p distem_temp`
+`rsync -a root@#{CORD}:~/ distem_temp/`
