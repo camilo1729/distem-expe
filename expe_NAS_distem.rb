@@ -73,9 +73,9 @@ vnodes_tests.each{ |vnodes|
     log.info "using subnet: #{expe_net}"
 
     if CORES.nil? then
-      log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user} --net #{expe_net}")
+      log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} --net #{expe_net}")
     else
-      log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user} -r 1 -c #{CORES} --net #{expe_net}")
+      log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -r 1 -c #{CORES} --net #{expe_net}")
     end
 
     log.info ssh.exec!("ruby create_machinefile.rb")
