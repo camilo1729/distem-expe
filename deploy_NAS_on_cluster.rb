@@ -11,6 +11,9 @@ DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
 
 log_file = File.open(metadata["log_file"], "a")
 log = Logger.new MultiIO.new(STDOUT, log_file)
+log.level = Logger::INFO
+#log.level = Logger::DEBUG
+
 
 log.info "Reading machine file"
 

@@ -20,6 +20,10 @@ DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
 
 log_file = File.open(metadata["log_file"], "a")
 log = Logger.new MultiIO.new(STDOUT, log_file)
+log.level = Logger::INFO
+#log.level = Logger::DEBUG
+
+
 
 log.info "Downloading necessary scripts"
 expe_scripts = ["create_machinefile.rb","cluster_distem.rb","delete_cluster.rb","deploy_NAS_on_cluster.rb"]
@@ -43,10 +47,10 @@ vnodes_tests.each{ |vnodes|
     log.info "printing kernel version"
     log.info ssh.exec!("uname -a")
 
-    if CORES > 0 then
-      log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user} -r 1 -c #{CORES}")
-    else
+    if CORES.nil? 0 then
       log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user}")
+    else
+      log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user} -r 1 -c #{CORES}")
     end
 
     log.info ssh.exec!("ruby create_machinefile.rb")

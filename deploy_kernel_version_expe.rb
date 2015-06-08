@@ -7,10 +7,10 @@ require 'cute'
 load 'utils.rb'
 
 NB = ARGV[0].to_i
-JOB_NAME = ARGV[1]
+job_name = ARGV[1]
 
 
-JOB_NAME = "distem" if JOB_NAME.nil?
+job_name = "distem" if job_name.nil?
 
 if NB.nil? then
 
@@ -22,8 +22,13 @@ end
 metadata = YAML.load(File.read("expe_metadata.yaml"))
 DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
 
+
 log_file = File.open(metadata["log_file"], "a")
 log = Logger.new MultiIO.new(STDOUT, log_file)
+
+
+log.level = Logger::INFO
+#log.level = Logger::DEBUG if options[:debug]
 
 # parameter subnets makes the reservation  compatible with an installation of distem
 
@@ -36,11 +41,11 @@ reserv_param = {:site => "rennes",
                 :cluster => "paravance",
                 :wait => false,
                 :walltime => "03:00:00",
-                :type => :deploy, :name => JOB_NAME,
+                :type => :deploy, :name => job_name,
                 :subnets => [22,1],:queue => "testing"}#,:vlan => :routed)
 
 # In case we have already a reservation
-old_jobs = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == JOB_NAME}
+old_jobs = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == job_name}
 
 job = old_jobs.empty? ? g5k.reserve(reserv_param) : old_jobs.first
 
