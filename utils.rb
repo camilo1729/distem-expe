@@ -23,7 +23,12 @@ class MultiIO
   end
 
   def write(*args)
-    @targets.each {|t| t.write(*args)}
+    @targets.each {|t|
+      t.write(*args)
+      # this is just to assure a coherent log for multiple scripts
+      t.flush
+    }
+
   end
 
   def close
