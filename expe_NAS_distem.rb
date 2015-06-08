@@ -25,6 +25,20 @@ log.level = Logger::INFO
 
 
 
+g5k_api = {:uri => "https://api.grid5000.fr/",
+           :user => options[:user],
+           :version => "sid"}
+
+g5k = Cute::G5K::API.new(g5k_api)
+
+job = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == "distem"}.first
+
+
+net = g5k.get_subnets(job).first
+
+## change the assigments of ipS
+
+
 log.info "Downloading necessary scripts"
 expe_scripts = ["create_machinefile.rb","cluster_distem.rb","delete_cluster.rb","deploy_NAS_on_cluster.rb"]
 
@@ -39,18 +53,24 @@ Net::SCP.start(CORD, "root") do |scp|
   scp.upload "expe_metadata.yaml", "expe_metadata.yaml"
 end
 
-
+subnet = 0
 vnodes_tests.each{ |vnodes|
 
   log.info "Creating cluster #{vnodes} vnodes per pnode"
   Net::SSH.start(CORD, 'root') do |ssh|
     log.info "printing kernel version"
     log.info ssh.exec!("uname -a")
+    # generating new subnet
+    new_net = net.octets
+    new_net[2] = subnet
+    subnet +=2 # for the next round
+    expe_net = "#{new_net.join(".")}/#{22}"
+    log.info "using subnet: #{expe_net}"
 
     if CORES.nil? 0 then
-      log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user}")
+      log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user} --net #{expe_net}")
     else
-      log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user} -r 1 -c #{CORES}")
+      log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user} -r 1 -c #{CORES} --net #{expe_net}")
     end
 
     log.info ssh.exec!("ruby create_machinefile.rb")
