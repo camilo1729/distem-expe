@@ -7,10 +7,10 @@ require 'cute'
 load 'utils.rb'
 
 NB = ARGV[0].to_i
-JOB_NAME = ARGV[1].to_i
+JOB_NAME = ARGV[1]
 
 
-JOB_NAME = "distem" if JOB_NAME.empty?
+JOB_NAME = "distem" if JOB_NAME.nil?
 
 if NB.nil? then
 
@@ -129,7 +129,7 @@ kernel_versions.each do |kernel|
     log.info session.exec! "uname -a"
   end
 
-  log.info "Experiments will run with #{nodelist.length}"
+  log.info "Experiments will run with #{nodelist.length} machines"
 
 # running NAS benchmark
   `ruby deploy_NAS_on_cluster.rb #{nodelist.length} 20`
