@@ -34,13 +34,23 @@ g5k = Cute::G5K::API.new(g5k_api)
 job = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == "distem"}.first
 
 
-net = g5k.get_subnets(job).first
+# its an array like this:
 
-## change the assigments of ipS
+  # {"subnets"=>
+  #   ["10.158.0.0/22",
+  #    "10.158.4.0/22",
+  #    "10.158.8.0/22",
+  #    "10.158.12.0/22",
+  #    "10.158.16.0/22",
+  #    "10.158.20.0/22",
+  #    "10.158.24.0/22",
 
+net = g5k.get_subnets(job)
+
+## change the assigments of ips
 
 log.info "Downloading necessary scripts"
-expe_scripts = ["utils","create_machinefile.rb","cluster_distem.rb","delete_cluster.rb","deploy_NAS_on_cluster.rb"]
+expe_scripts = ["utils.rb","create_machinefile.rb","cluster_distem.rb","delete_cluster.rb","deploy_NAS_on_cluster.rb"]
 
 
 
@@ -61,10 +71,12 @@ vnodes_tests.each{ |vnodes|
     log.info "printing kernel version"
     log.info ssh.exec!("uname -a")
     # generating new subnet
-    new_net = net.octets
-    new_net[2] = subnet
-    subnet +=2 # for the next round
-    expe_net = "#{new_net.join(".")}/#{22}"
+    # new_net = net.octets
+    # new_net[2] = subnet
+    # subnet +=2 # for the next round
+    #expe_net = "#{new_net.join(".")}/#{22}"
+    expe_net = net[subnet].to_string
+    subnet+=1
     log.info "using subnet: #{expe_net}"
 
     if CORES.nil? then
