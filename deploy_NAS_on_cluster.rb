@@ -32,8 +32,8 @@ log.info "Downloading NAS if does not exist"
 # Transferring code to the first machine
 log.info "Sending machine file and code to the first node: #{nodes.first}"
 Net::SCP.start(nodes.first,'root') do |scp|
-   log.info scp.upload "machine_file", "machine_file"
-   log.info scp.upload "/tmp/NAS.tar", "/tmp/NAS.tar"
+   log.debug scp.upload "machine_file", "machine_file"
+   log.debug scp.upload "/tmp/NAS.tar", "/tmp/NAS.tar"
 end
 
 
@@ -62,7 +62,7 @@ end
 log.info "Downloading the generated binaries"
 Net::SCP.start(nodes.first,'root') do |scp|
   binaries.each do |binary|
-    log.info scp.download "/tmp/NPB3.3/NPB3.3-MPI/bin/#{binary}",binary
+    log.debug scp.download "/tmp/NPB3.3/NPB3.3-MPI/bin/#{binary}",binary
   end
 end
 
