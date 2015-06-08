@@ -23,8 +23,6 @@ log = Logger.new MultiIO.new(STDOUT, log_file)
 log.level = Logger::INFO
 #log.level = Logger::DEBUG
 
-
-
 g5k_api = {:uri => "https://api.grid5000.fr/",
            :user => g5k_user,
            :version => "sid"}
@@ -70,11 +68,6 @@ vnodes_tests.each{ |vnodes|
   Net::SSH.start(CORD, 'root') do |ssh|
     log.info "printing kernel version"
     log.info ssh.exec!("uname -a")
-    # generating new subnet
-    # new_net = net.octets
-    # new_net[2] = subnet
-    # subnet +=2 # for the next round
-    #expe_net = "#{new_net.join(".")}/#{22}"
     expe_net = net[subnet].to_string
     subnet+=1
     log.info "using subnet: #{expe_net}"

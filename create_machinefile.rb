@@ -5,7 +5,7 @@ require 'distem'
 iplist = []
 nbcores = ARGV[0].to_i
 
-nbcores = 1 if nbcores.nil?
+nbcores = 1 if nbcores < 1
 Distem.client do |cl|
 
   info = cl.vnodes_info
