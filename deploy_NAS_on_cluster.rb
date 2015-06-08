@@ -1,7 +1,7 @@
 require 'cute'
 require 'net/scp'
 require 'yaml'
-
+load 'utils.rb'
 nodes = []
 SOURCE_NAS =  "http://public.grenoble.grid5000.fr/~cruizsanabria/NPB3.3.tar"
 
