@@ -7,6 +7,10 @@ require 'cute'
 load 'utils.rb'
 
 NB = ARGV[0].to_i
+JOB_NAME = ARGV[1].to_i
+
+
+JOB_NAME = "distem" if JOB_NAME.empty?
 
 if NB.nil? then
 
@@ -27,18 +31,19 @@ g5k = Cute::G5K::API.new()
 
 # always take the whole switch
 reserv_param = {:site => "rennes",
-                :switches => 1+ NB%36,
+                :switches => 1+ NB/36,
                 :nodes => NB,
                 :cluster => "paravance",
                 :wait => false,
                 :walltime => "03:00:00",
-                :type => :deploy, :name => 'distem',
+                :type => :deploy, :name => JOB_NAME,
                 :subnets => [22,1],:queue => "testing"}#,:vlan => :routed)
 
-# In case we have already a reservatioin
-old_jobs = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == "distem"}
+# In case we have already a reservation
+old_jobs = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == JOB_NAME}
 
 job = old_jobs.empty? ? g5k.reserve(reserv_param) : old_jobs.first
+
 
 begin
   job = g5k.wait_for_job(job, :wait_time => 7200)
@@ -90,10 +95,9 @@ kernel_versions.each do |kernel|
 
   end
 
-  nodelist.map!{|node| Resolv.getaddress node}
-
   File.open("machine_file",'w+') do |f|
-    nodelist.each{ |node| f.puts node }
+    iplist = nodelist.map{|node| Resolv.getaddress node}
+    iplist.each{ |node| f.puts node }
   end
 
   key_dir = Dir.mktmpdir("keys")
@@ -107,7 +111,6 @@ kernel_versions.each do |kernel|
     f.puts "StrictHostKeyChecking no"
     f.puts "UserKnownHostsFile=/dev/null "
   end
-
 
   nodelist.each do |node|
 
@@ -134,6 +137,7 @@ kernel_versions.each do |kernel|
   `mkdir -p real_k#{kernel}`
   `mv profile-* real_k#{kernel}/`
 
+  log.info "Starting tests with Containers"
 
 # now Install Distem into the nodes
   `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{nodelist.first} --env #{jessie_env} -g --debian-version jessie`
