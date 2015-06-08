@@ -26,7 +26,7 @@ log.level = Logger::INFO
 
 
 g5k_api = {:uri => "https://api.grid5000.fr/",
-           :user => options[:user],
+           :user => g5k_user,
            :version => "sid"}
 
 g5k = Cute::G5K::API.new(g5k_api)
@@ -67,7 +67,7 @@ vnodes_tests.each{ |vnodes|
     expe_net = "#{new_net.join(".")}/#{22}"
     log.info "using subnet: #{expe_net}"
 
-    if CORES.nil? 0 then
+    if CORES.nil? then
       log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user} --net #{expe_net}")
     else
       log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -u #{g5k_user} -r 1 -c #{CORES} --net #{expe_net}")

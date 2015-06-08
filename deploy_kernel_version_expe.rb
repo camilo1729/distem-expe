@@ -28,7 +28,7 @@ log = Logger.new MultiIO.new(STDOUT, log_file)
 
 
 log.level = Logger::INFO
-#log.level = Logger::DEBUG if options[:debug]
+#log.level = Logger::DEBUG
 
 # parameter subnets makes the reservation  compatible with an installation of distem
 
@@ -42,7 +42,7 @@ reserv_param = {:site => "rennes",
                 :wait => false,
                 :walltime => "03:00:00",
                 :type => :deploy, :name => job_name,
-                :subnets => [22,1],:queue => "testing"}#,:vlan => :routed)
+                :subnets => [18,1],:queue => "testing"}#,:vlan => :routed)
 
 # In case we have already a reservation
 old_jobs = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == job_name}
