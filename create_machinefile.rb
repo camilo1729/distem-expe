@@ -4,7 +4,7 @@ require 'distem'
 
 iplist = []
 nbcores = ARGV[0].to_i
-numnodes = ARG[1].to_i
+numnodes = ARGV[1].to_i
 
 nbcores = 1 if nbcores < 1
 
