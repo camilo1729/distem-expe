@@ -108,11 +108,10 @@ KERNEL_VERSIONS.each do |kernel|
 
   end
 
+  iplist = nodelist.map{|node| Resolv.getaddress node}
+
   File.open("machine_file",'w+') do |f|
-    nodelist.each{ |node| f.puts node }
-    # Writing IP of hosts comment out if it necessary
-    # iplist = nodelist.map{|node| Resolv.getaddress node}
-    # iplist.each{ |node| f.puts node }
+    iplist.each{ |node| f.puts node }
   end
 
   machinefile = File.absolute_path("machine_file")
@@ -157,8 +156,7 @@ KERNEL_VERSIONS.each do |kernel|
   log.info "Starting tests with Containers"
 
  # now Install Distem into the nodes
-  `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{nodelist.first} --env #{jessie_env} -g --debian-version jessie --nodefile #{machinefile}`
-  `ruby expe_NAS_distem.rb #{nodelist.first} #{CORES}`
-
+  `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{iplist.first} --env #{jessie_env} -g --debian-version jessie --nodefile #{machinefile}`
+  `ruby expe_NAS_distem.rb #{iplist.first} #{CORES}`
   `mv distem_temp/ distem_k#{kernel}/`
 end

@@ -16,7 +16,7 @@ LXC_IMAGE_PATH = "#{home}/jessie-tau-lxc.tar.gz"
 metadata = YAML.load(File.read("expe_metadata.yaml"))
 DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
 RUNS = metadata["runs"]
-VNODES_TESTS = medatada["container_tests"]
+VNODES_TESTS = metadata["container_tests"]
 
 log_file = File.open(metadata["log_file"], "a")
 log = Logger.new MultiIO.new(STDOUT, log_file)

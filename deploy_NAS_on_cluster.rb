@@ -14,7 +14,6 @@ log = Logger.new MultiIO.new(STDOUT, log_file)
 log.level = Logger::INFO
 #log.level = Logger::DEBUG
 
-
 log.info "Reading machine file"
 
 f = File.open("machine_file", "r")
@@ -22,7 +21,6 @@ f.each_line do |line|
   nodes.push(line.chop)
 end
 f.close
-
 
 # making nodes unique
 num_procs = nodes.length
@@ -43,7 +41,7 @@ end
 # Compiling on the fist machine
 TAU_MAKE = "/usr/local/tau-install/x86_64/lib/Makefile.tau-mpi-pdt"
 
-# Reading the bench to deploy
+# Reading the benchs to deploy
 benchs = YAML.load(File.read("expe_metadata.yaml"))["benchs"]
 
 NUM_PROCS = ARGV[0]
@@ -80,11 +78,9 @@ end
 
 log.info "Executing #{RUNS} runs per type of bench"
 
-
-
 Net::SSH.start(nodes.first, 'root') do |ssh|
   RUNS.times do |iteration|
-    log.info "Starting run: #{iteration}/#{RUNS}"
+    log.info "Starting run: #{iteration+1}/#{RUNS}"
     binaries.each do |binary|
       log.info "Executing binary: #{binary}"
       ssh.exec!("mpirun  --mca btl self,sm,tcp --machinefile machine_file #{binary}")
