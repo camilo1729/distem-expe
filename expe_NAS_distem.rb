@@ -6,6 +6,7 @@ require 'cute'
 
 load 'utils.rb'
 CORD = ARGV[0]
+# number of cores
 CORES = ARGV[1].to_i
 
 home = ENV['HOME']
