@@ -14,7 +14,7 @@ nodes_dirs = Dir.glob("nodes_*")
 kernel_versions = ["3.2","3.16","4.0"]
 
 
-PATH_PPROF = `find \`pwd\` -name pprof`.chop
+PATH_PPROF = `cd ..; find \`pwd\` -name pprof`.chop
 # iterating over the number of machines
 nodes_dirs.each do |num|
 
