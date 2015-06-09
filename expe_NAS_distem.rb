@@ -6,7 +6,7 @@ require 'cute'
 
 load 'utils.rb'
 CORD = ARGV[0]
-CORES = ARGV[1]
+CORES = ARGV[1].to_i
 
 home = ENV['HOME']
 g5k_user = ENV['USER']
@@ -30,7 +30,6 @@ g5k_api = {:uri => "https://api.grid5000.fr/",
 g5k = Cute::G5K::API.new(g5k_api)
 
 job = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == "distem"}.first
-
 
 # its an array like this:
 
