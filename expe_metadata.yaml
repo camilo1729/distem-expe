@@ -1,6 +1,11 @@
 ---
 log_file: "Distem_expe.log"
 distem_bootstrap_path: "~/Repositories/ruby-cute/examples"
+runs: 20
+kernel_versions:
+- "3.2"
+- "3.16"
+- "4.0"
 benchs:
 - :type: lu
   :class: B

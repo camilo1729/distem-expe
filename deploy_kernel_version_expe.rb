@@ -21,7 +21,8 @@ end
 ## getting experiment metadata
 metadata = YAML.load(File.read("expe_metadata.yaml"))
 DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
-
+RUNS = metadata["runs"]
+KERNEL_VERSIONS = metadata["kernel_versions"]
 
 log_file = File.open(metadata["log_file"], "a")
 log = Logger.new MultiIO.new(STDOUT, log_file)
@@ -63,14 +64,17 @@ log.info "Downloading necessary scripts"
 `wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/deploy_NAS_on_cluster.rb`
 `wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/expe_NAS_distem.rb`
 
-kernel_versions = ["3.2","3.16","4.0"]
 
-kernel_versions.each do |kernel|
+nodelist = job['assigned_nodes'].uniq
+
+nodelist = nodelist[0..(NB-1)] # choosing the require amount of nodes
+
+KERNEL_VERSIONS.each do |kernel|
 
   log.info "Testing with kernel version #{kernel}"
 
   jessie_env = "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml"
-  g5k.deploy(job,:env => jessie_env)
+  g5k.deploy(job,:nodes => nodelist, :env => jessie_env)
   g5k.wait_for_deploy(job)
 
   badnodes = check_deployment(job["deploy"].last)
@@ -82,7 +86,7 @@ kernel_versions.each do |kernel|
     badnodes = check_deployment(job["deploy"].last)
   end
 
-  nodelist = job['assigned_nodes'].uniq
+
   badnodes = check_cpu_performance(nodelist,18)
 
   while not badnodes.empty? do
@@ -105,6 +109,8 @@ kernel_versions.each do |kernel|
     iplist = nodelist.map{|node| Resolv.getaddress node}
     iplist.each{ |node| f.puts node }
   end
+
+  machinefile = File.absolute_path("machine_file")
 
   key_dir = Dir.mktmpdir("keys")
   system "ssh-keygen -P \'\' -f #{key_dir}/keys"
@@ -138,17 +144,16 @@ kernel_versions.each do |kernel|
   log.info "Experiments will run with #{nodelist.length} machines"
 
 # running NAS benchmark
-  `ruby deploy_NAS_on_cluster.rb #{nodelist.length} 20`
+  `ruby deploy_NAS_on_cluster.rb #{nodelist.length} #{RUNS}`
 
   `mkdir -p real_k#{kernel}`
   `mv profile-* real_k#{kernel}/`
 
   log.info "Starting tests with Containers"
 
-# now Install Distem into the nodes
-  `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{nodelist.first} --env #{jessie_env} -g --debian-version jessie`
+ # now Install Distem into the nodes
+  `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{nodelist.first} --env #{jessie_env} -g --debian-version jessie --nodefile #{machinefile}`
   `ruby expe_NAS_distem.rb #{nodelist.first}`
 
-  `mkdir -p distem_k#{kernel}`
   `mv distem_temp/ distem_k#{kernel}/`
 end
