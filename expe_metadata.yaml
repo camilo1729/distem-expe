@@ -1,6 +1,8 @@
 ---
 log_file: "Distem_expe.log"
 distem_bootstrap_path: "~/Repositories/ruby-cute/examples"
+site: "rennes"
+cluster: "paravance"
 runs: 20
 kernel_versions:
 - "3.2"

@@ -24,6 +24,8 @@ DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
 RUNS = metadata["runs"]
 KERNEL_VERSIONS = metadata["kernel_versions"]
 CORES = metadata["container_cores"]
+SITE = metadata["site"]
+CLUSTER = metadata["cluster"]
 
 log_file = File.open(metadata["log_file"], "a")
 log = Logger.new MultiIO.new(STDOUT, log_file)
@@ -37,10 +39,10 @@ log.level = Logger::INFO
 g5k = Cute::G5K::API.new()
 
 # always take the whole switch
-reserv_param = {:site => "rennes",
+reserv_param = {:site => SITE,
                 :switches => 1+ NB/36,
                 :nodes => NB,
-                :cluster => "paravance",
+                :cluster => CLUSTER,
                 :wait => false,
                 :walltime => "02:00:00",
                 :type => :deploy, :name => job_name,
