@@ -34,11 +34,18 @@ communication_functions=c("MPI_Init()","MPI_Recv()","MPI_Send()","MPI_Wait()")
 
 comm <- subset(summary_table, method %in% communication_functions)
 colnames(comm) <-c('method','percent','usec')
-appli <- subset(summary_table, method == "APPLU")
+appli <- subset(summary_table, as.numeric(percent) > 99)
+
 
 # it summarizes computation methods
-cpu <- data.frame(method = c('cpu'), percent = c( appli$percent - sum(comm$percent)), usec = c(appli$usec - sum(comm$usec)))
+cpu <- data.frame(method = c('cpu'), percent = c( appli$percent - sum(comm$percent)), usec = c(appli$usec*(appli$percent - sum(comm$percent))/100))
 def <- rbind(cpu,comm)
 def
+
+print("Resuming communication")
+comm_clean <- subset(comm, method != "MPI_Init()")
+print(paste("Total percentage: ",sum(comm_clean$percent)))
+print(paste("Total time spend in comm:",appli$usec*(sum(comm_clean$percent)/100)/1000))
+
 
 

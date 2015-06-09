@@ -79,7 +79,7 @@ fig = fig + theme_bw()+ theme(
 
 )
 
-ggsave(paste("execution_time-",kversion,".pdf", sep=""),plot = fig)
+ggsave(paste("kernel-container-",kversion,".pdf", sep=""),plot = fig)
 
 ## # it summarizes computation methods
 ## cpu <- data.frame(method = c('cpu'), percent = c( appli$percent - sum(comm$percent)), usec = c(appli$usec - sum(comm$usec)))
