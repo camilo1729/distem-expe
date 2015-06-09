@@ -23,7 +23,7 @@ metadata = YAML.load(File.read("expe_metadata.yaml"))
 DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
 RUNS = metadata["runs"]
 KERNEL_VERSIONS = metadata["kernel_versions"]
-CORES = medata["container_cores"]
+CORES = metadata["container_cores"]
 
 log_file = File.open(metadata["log_file"], "a")
 log = Logger.new MultiIO.new(STDOUT, log_file)
