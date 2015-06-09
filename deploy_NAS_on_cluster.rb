@@ -83,7 +83,8 @@ log.info "Executing #{RUNS} runs per type of bench"
 
 
 Net::SSH.start(nodes.first, 'root') do |ssh|
-  RUNS.times do
+  RUNS.times do |iteration|
+    log.info "Starting run: #{iteration}/#{RUNS}"
     binaries.each do |binary|
       log.info "Executing binary: #{binary}"
       ssh.exec!("mpirun  --mca btl self,sm,tcp --machinefile machine_file #{binary}")

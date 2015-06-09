@@ -6,6 +6,12 @@ kernel_versions:
 - "3.2"
 - "3.16"
 - "4.0"
+container_tests:
+- 1
+- 2
+- 4
+- 8
+container_cores: 0
 benchs:
 - :type: lu
   :class: B

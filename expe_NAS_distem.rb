@@ -11,13 +11,12 @@ CORES = ARGV[1]
 home = ENV['HOME']
 g5k_user = ENV['USER']
 
-vnodes_tests = [1, 2, 4, 8]
-
 LXC_IMAGE_PATH = "#{home}/jessie-tau-lxc.tar.gz"
 
 metadata = YAML.load(File.read("expe_metadata.yaml"))
 DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
 RUNS = metadata["runs"]
+VNODES_TESTS = medatada["container_tests"]
 
 log_file = File.open(metadata["log_file"], "a")
 log = Logger.new MultiIO.new(STDOUT, log_file)
@@ -62,7 +61,7 @@ Net::SCP.start(CORD, "root") do |scp|
 end
 
 
-vnodes_tests.each{ |vnodes|
+VNODES_TESTS.each{ |vnodes|
 
   log.info "Creating cluster #{vnodes} vnodes per pnode"
   Net::SSH.start(CORD, 'root') do |ssh|
@@ -71,7 +70,7 @@ vnodes_tests.each{ |vnodes|
     expe_net = net.shift.to_string
     log.info "using subnet: #{expe_net}"
 
-    if CORES.nil? then
+    if CORES < 1 then
       log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} --net #{expe_net}")
     else
       log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -r 1 -c #{CORES} --net #{expe_net}")

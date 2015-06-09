@@ -23,6 +23,7 @@ metadata = YAML.load(File.read("expe_metadata.yaml"))
 DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
 RUNS = metadata["runs"]
 KERNEL_VERSIONS = metadata["kernel_versions"]
+CORES = medata["container_cores"]
 
 log_file = File.open(metadata["log_file"], "a")
 log = Logger.new MultiIO.new(STDOUT, log_file)
@@ -64,10 +65,10 @@ log.info "Downloading necessary scripts"
 `wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/deploy_NAS_on_cluster.rb`
 `wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/expe_NAS_distem.rb`
 
-
 nodelist = job['assigned_nodes'].uniq
 
 nodelist = nodelist[0..(NB-1)] # choosing the require amount of nodes
+log.info "Running with #{NB} nodes"
 
 KERNEL_VERSIONS.each do |kernel|
 
@@ -106,8 +107,10 @@ KERNEL_VERSIONS.each do |kernel|
   end
 
   File.open("machine_file",'w+') do |f|
-    iplist = nodelist.map{|node| Resolv.getaddress node}
-    iplist.each{ |node| f.puts node }
+    nodelist.each{ |node| f.puts node }
+    # Writing IP of hosts comment out if it necessary
+    # iplist = nodelist.map{|node| Resolv.getaddress node}
+    # iplist.each{ |node| f.puts node }
   end
 
   machinefile = File.absolute_path("machine_file")
@@ -153,7 +156,7 @@ KERNEL_VERSIONS.each do |kernel|
 
  # now Install Distem into the nodes
   `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{nodelist.first} --env #{jessie_env} -g --debian-version jessie --nodefile #{machinefile}`
-  `ruby expe_NAS_distem.rb #{nodelist.first}`
+  `ruby expe_NAS_distem.rb #{nodelist.first} #{CORES}`
 
   `mv distem_temp/ distem_k#{kernel}/`
 end
