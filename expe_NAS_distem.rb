@@ -48,7 +48,7 @@ net = g5k.get_subnets(job)
 ## change the assigments of ips
 
 log.info "Downloading necessary files"
-expe_files = ["utils.rb","create_machinefile.rb","cluster_distem.rb","delete_cluster.rb","deploy_NAS_on_cluster.rb","expe_metadata.yaml"]
+expe_files = ["utils.rb","create_machinefile.rb","cluster_distem.rb","delete_cluster.rb","deploy_NAS_on_cluster.rb"]
 
 
 
@@ -58,6 +58,7 @@ Net::SCP.start(CORD, "root") do |scp|
     `wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/#{file}`
     scp.upload file, file
   end
+  scp.upload "expe_metadata.yaml", "expe_metadata.yaml"
 end
 
 
