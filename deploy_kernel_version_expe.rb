@@ -26,6 +26,7 @@ KERNEL_VERSIONS = metadata["kernel_versions"]
 CORES = metadata["container_cores"]
 SITE = metadata["site"]
 CLUSTER = metadata["cluster"]
+NUM_CONTAINERS = ARGV[1].to_i if metadata["multi_machine"] # it controls if we want to iterate with the benchmark
 
 log_file = File.open(metadata["log_file"], "a")
 log = Logger.new MultiIO.new(STDOUT, log_file)
@@ -157,7 +158,11 @@ KERNEL_VERSIONS.each do |kernel|
 
  # now Install Distem into the nodes
   `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{iplist.first} --env #{jessie_env} -g --debian-version jessie --nodefile #{machinefile}`
-  `ruby expe_NAS_distem.rb #{iplist.first} #{CORES}`
+  if metadata["multi_machine"] then
+    `ruby expe_NAS_distem_multi.rb #{iplist.first} #{CORES} #{NUM_CONTAINERS}`
+  else
+    `ruby expe_NAS_distem.rb #{iplist.first} #{CORES}`
+  end
   `mv distem_temp/ distem_k#{kernel}/`
 end
 

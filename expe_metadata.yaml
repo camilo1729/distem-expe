@@ -4,6 +4,7 @@ distem_bootstrap_path: "~/Repositories/ruby-cute/examples"
 site: "rennes"
 cluster: "paravance"
 runs: 20
+multi_machine: false
 kernel_versions:
 - "3.2"
 - "3.16"
@@ -13,6 +14,13 @@ container_tests:
 - 2
 - 4
 - 8
+machine_tests:
+- 4
+- 8
+- 16
+- 32
+- 64
+- 128
 container_cores: 0
 benchs:
 - :type: lu
