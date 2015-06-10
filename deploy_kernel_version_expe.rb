@@ -64,8 +64,8 @@ end
 
 log.info "Downloading necessary scripts"
 
-`wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/deploy_NAS_on_cluster.rb`
-`wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/expe_NAS_distem.rb`
+`wget -p https://raw.githubusercontent.com/camilo1729/distem-expe/master/deploy_NAS_on_cluster.rb`
+`wget -p https://raw.githubusercontent.com/camilo1729/distem-expe/master/expe_NAS_distem.rb`
 
 nodelist = job['assigned_nodes'].uniq
 
@@ -160,3 +160,5 @@ KERNEL_VERSIONS.each do |kernel|
   `ruby expe_NAS_distem.rb #{iplist.first} #{CORES}`
   `mv distem_temp/ distem_k#{kernel}/`
 end
+
+log.info "All experiments finished"

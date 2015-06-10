@@ -55,7 +55,7 @@ Net::SSH.start(nodes.first, 'root') do |ssh|
     compile = "export PATH=/usr/local/tau-install/x86_64/bin/:$PATH;"
     compile += "export TAU_MAKEFILE=#{TAU_MAKE};"
     compile += "make #{bench[:type]} NPROCS=#{NUM_PROCS} CLASS=#{bench[:class]} MPIF77=tau_f90.sh -C /tmp/NPB3.3/NPB3.3-MPI/"
-    log.info ssh.exec!(compile)
+    log.debug ssh.exec!(compile)
     binaries.push("#{bench[:type]}.#{bench[:class]}.#{NUM_PROCS}")
   end
 end

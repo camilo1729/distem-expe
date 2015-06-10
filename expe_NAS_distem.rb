@@ -55,7 +55,7 @@ expe_files = ["utils.rb","create_machinefile.rb","cluster_distem.rb","delete_clu
 Net::SCP.start(CORD, "root") do |scp|
 
   expe_files.each do |file|
-    `wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/#{file}`
+    `wget -p https://raw.githubusercontent.com/camilo1729/distem-expe/master/#{file}`
     scp.upload file, file
   end
 end
@@ -88,6 +88,7 @@ VNODES_TESTS.each{ |vnodes|
 
 }
 
+log.info "Containers test finished"
 log.info "Getting the results"
 `mkdir -p distem_temp`
 `rsync -a root@#{CORD}:~/ distem_temp/`
