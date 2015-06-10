@@ -55,7 +55,7 @@ expe_files = ["utils.rb","create_machinefile.rb","cluster_distem.rb","delete_clu
 Net::SCP.start(CORD, "root") do |scp|
 
   expe_files.each do |file|
-    `wget -p https://raw.githubusercontent.com/camilo1729/distem-expe/master/#{file}`
+    `wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/#{file}`
     scp.upload file, file
   end
 end

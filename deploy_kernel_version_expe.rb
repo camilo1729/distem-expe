@@ -64,8 +64,8 @@ end
 
 log.info "Downloading necessary scripts"
 
-`wget -p https://raw.githubusercontent.com/camilo1729/distem-expe/master/deploy_NAS_on_cluster.rb`
-`wget -p https://raw.githubusercontent.com/camilo1729/distem-expe/master/expe_NAS_distem.rb`
+`wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/deploy_NAS_on_cluster.rb`
+`wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/expe_NAS_distem.rb`
 
 nodelist = job['assigned_nodes'].uniq
 
