@@ -9,10 +9,10 @@ CORD = ARGV[0]
 # number of cores
 CORES = ARGV[1].to_i
 
-home = ENV['HOME']
-g5k_user = ENV['USER']
+HOME = ENV['HOME']
+G5K_USER = ENV['USER']
 
-LXC_IMAGE_PATH = "#{home}/jessie-tau-lxc.tar.gz"
+LXC_IMAGE_PATH = "#{HOME}/jessie-tau-lxc.tar.gz"
 
 metadata = YAML.load(File.read("expe_metadata.yaml"))
 DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
@@ -25,7 +25,7 @@ log.level = Logger::INFO
 #log.level = Logger::DEBUG
 
 g5k_api = {:uri => "https://api.grid5000.fr/",
-           :user => g5k_user,
+           :user => G5K_USER,
            :version => "sid"}
 
 g5k = Cute::G5K::API.new(g5k_api)
@@ -62,7 +62,7 @@ Net::SCP.start(CORD, "root") do |scp|
 end
 
 
-VNODES_TESTS.each{ |vnodes|
+VNODES_TESTS.each do |vnodes|
 
   log.info "Creating cluster #{vnodes} vnodes per pnode"
   Net::SSH.start(CORD, 'root') do |ssh|
@@ -87,7 +87,7 @@ VNODES_TESTS.each{ |vnodes|
     log.info ssh.exec!("ruby delete_cluster.rb")
   end
 
-}
+end
 
 log.info "Containers test finished"
 log.info "Getting the results"
