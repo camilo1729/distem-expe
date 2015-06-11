@@ -7,7 +7,7 @@ require 'cute'
 load 'utils.rb'
 CORD = ARGV[0]
 CORES = ARGV[1].to_i
-VNODES_TESTS = ARGV[2]
+VNODES_TESTS = [ARGV[2]]
 
 home = ENV['HOME']
 g5k_user = ENV['USER']

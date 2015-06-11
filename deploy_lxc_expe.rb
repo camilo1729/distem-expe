@@ -7,7 +7,7 @@ require 'cute'
 load 'utils.rb'
 
 NB = ARGV[0].to_i
-job_name = ARGV[1]
+job_name = ARGV[2]
 
 
 job_name = "distem" if job_name.nil?
