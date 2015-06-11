@@ -2,6 +2,9 @@
 
 nodes = [128,64,32,16,8,4]
 
+`wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/deploy_lxc_expe.rb`
+`wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/utils.rb`
+
 lxcpnode = 1
 nodes.each do |num|
 

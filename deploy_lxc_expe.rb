@@ -67,6 +67,7 @@ log.info "Downloading necessary scripts"
 
 `wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/deploy_NAS_on_cluster.rb`
 `wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/expe_NAS_distem.rb`
+`wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/expe_NAS_distem_multi.rb` if metadata["multi_machine"]
 
 nodelist = job['assigned_nodes'].uniq
 
