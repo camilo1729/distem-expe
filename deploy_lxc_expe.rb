@@ -90,7 +90,6 @@ KERNEL_VERSIONS.each do |kernel|
     badnodes = check_deployment(job["deploy"].last)
   end
 
-
   badnodes = check_cpu_performance(nodelist,18)
 
   while not badnodes.empty? do
@@ -100,13 +99,11 @@ KERNEL_VERSIONS.each do |kernel|
     badnodes = check_cpu_performance(nodelist,18)
   end
 
-
   log.info "Generating machine file"
-  if nodelist.length > NB then
 
+  if nodelist.length > NB then
     log.info "Names in the nodelist are not unique exiting"
     exit
-
   end
 
   iplist = nodelist.map{|node| Resolv.getaddress node}
