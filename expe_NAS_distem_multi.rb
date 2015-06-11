@@ -6,7 +6,7 @@ require 'cute'
 
 load 'utils.rb'
 CORD = ARGV[0]
-CORES = ARGV[1]
+CORES = ARGV[1].to_i
 VNODES_TESTS = ARGV[2]
 
 home = ENV['HOME']
@@ -56,7 +56,7 @@ expe_files = ["utils.rb","create_machinefile.rb","cluster_distem.rb","delete_clu
 Net::SCP.start(CORD, "root") do |scp|
 
   expe_files.each do |file|
-    `wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/#{file}`
+    `wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/#{file}`
     scp.upload file, file
   end
 end
@@ -78,8 +78,9 @@ VNODES_TESTS.each{ |vnodes|
     end
 
     MACHINES_TESTS.each do |num|
-      log.info ssh.exec!("ruby create_machinefile.rb #{num}")
+      log.info ssh.exec!("ruby create_machinefile.rb 0 #{num}")
       log.info "Verifying connectivity"
+      log.info "Running bench with #{num}"
       log.info ssh.exec!("for i in $(cat machine_file); do ssh $i hostname; done")
       lines = ssh.exec!("wc -l machine_file")
       num_nodes = lines.split(" ").first
