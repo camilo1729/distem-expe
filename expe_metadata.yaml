@@ -5,6 +5,7 @@ site: "rennes"
 cluster: "paravance"
 runs: 20
 multi_machine: false
+performance_check: true
 kernel_versions:
 - "3.2"
 - "3.16"

@@ -91,13 +91,15 @@ KERNEL_VERSIONS.each do |kernel|
     badnodes = check_deployment(job["deploy"].last)
   end
 
-  badnodes = check_cpu_performance(nodelist,18)
-
-  while not badnodes.empty? do
-    log.info "Redeploying nodes because of performance #{badnodes}"
-    g5k.deploy(job,:nodes => badnodes, :env => "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml")
-    g5k.wait_for_deploy(job)
+  if metadata["performance_check"] then
     badnodes = check_cpu_performance(nodelist,18)
+
+    while not badnodes.empty? do
+      log.info "Redeploying nodes because of performance #{badnodes}"
+      g5k.deploy(job,:nodes => badnodes, :env => "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml")
+      g5k.wait_for_deploy(job)
+      badnodes = check_cpu_performance(nodelist,18)
+    end
   end
 
   log.info "Generating machine file"
