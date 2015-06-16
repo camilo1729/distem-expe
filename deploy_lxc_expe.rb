@@ -27,6 +27,7 @@ CORES = metadata["container_cores"]
 SITE = metadata["site"]
 CLUSTER = metadata["cluster"]
 NUM_CONTAINERS = ARGV[1].to_i if metadata["multi_machine"] # it controls if we want to iterate with the benchmark
+BENCH_REAL_TEST = metadata["bench_real_test"]
 
 log_file = File.open(metadata["log_file"], "a")
 log = Logger.new MultiIO.new(STDOUT, log_file)
@@ -150,10 +151,20 @@ KERNEL_VERSIONS.each do |kernel|
     log.info session.exec! "uname -a"
   end
 
-  log.info "Experiments will run with #{nodelist.length} machines"
+  log.info "Bench real multi activated" if BENCH_REAL_TEST
 
-# running NAS benchmark
-  `ruby deploy_NAS_on_cluster.rb #{nodelist.length} #{RUNS}`
+  num_machines = BENCH_REAL_TEST ? BENCH_REAL_TEST : [nodelist.length]
+
+  log.info "Experiments will run with #{num_machines} machines"
+
+  num_machines.each do |num|
+
+    File.open("machine_file",'w+') do |f|
+      nodelist[0..(num-1)].each{ |node| CORES.times{f.puts node }}
+    end
+
+    `ruby deploy_NAS_on_cluster.rb #{num*cores} #{RUNS}`
+  end
 
   `mkdir -p real_k#{kernel}`
   `mv profile-* real_k#{kernel}/`

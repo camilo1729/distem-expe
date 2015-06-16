@@ -10,18 +10,19 @@ kernel_versions:
 - "3.2"
 - "3.16"
 - "4.0"
-container_tests:
+container_tests: # number of containers to be created in each machine
 - 1
 - 2
 - 4
 - 8
-machine_tests:
+bench_container_test:
 - 4
 - 8
 - 16
 - 32
 - 64
 - 128
+bench_real_test: false
 container_cores: 0
 benchs:
 - :type: lu
