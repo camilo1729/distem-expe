@@ -1,4 +1,3 @@
-
 require 'resolv'
 require 'net/scp'
 require 'cute'
@@ -163,7 +162,7 @@ KERNEL_VERSIONS.each do |kernel|
       nodelist[0..(num-1)].each{ |node| CORES.times{f.puts node }}
     end
 
-    `ruby deploy_NAS_on_cluster.rb #{num*cores} #{RUNS}`
+    `ruby deploy_NAS_on_cluster.rb #{num*CORES} #{RUNS}`
   end
 
   `mkdir -p real_k#{kernel}`
