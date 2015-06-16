@@ -22,7 +22,7 @@ metadata = YAML.load(File.read("expe_metadata.yaml"))
 DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
 RUNS = metadata["runs"]
 KERNEL_VERSIONS = metadata["kernel_versions"]
-CORES = metadata["container_cores"]
+CORES = metadata["container_cores"].to_i
 SITE = metadata["site"]
 CLUSTER = metadata["cluster"]
 NUM_CONTAINERS = ARGV[1].to_i if metadata["multi_machine"] # it controls if we want to iterate with the benchmark
@@ -159,7 +159,13 @@ KERNEL_VERSIONS.each do |kernel|
   num_machines.each do |num|
 
     File.open("machine_file",'w+') do |f|
-      nodelist[0..(num-1)].each{ |node| CORES.times{f.puts node }}
+      nodelist[0..(num-1)].each do |node|
+        if CORES > 1 then
+          CORES.times{f.puts node }
+        else
+          f.puts node
+        end
+      end
     end
 
     `ruby deploy_NAS_on_cluster.rb #{num*CORES} #{RUNS}`
