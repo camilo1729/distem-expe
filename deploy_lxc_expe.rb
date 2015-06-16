@@ -153,6 +153,7 @@ KERNEL_VERSIONS.each do |kernel|
   log.info "Bench real multi activated" if BENCH_REAL_TEST
 
   num_machines = BENCH_REAL_TEST ? BENCH_REAL_TEST : [nodelist.length]
+  cores = CORES > 1 ? CORES : 1
 
   log.info "Experiments will run with #{num_machines} machines"
 
@@ -160,15 +161,11 @@ KERNEL_VERSIONS.each do |kernel|
 
     File.open("machine_file",'w+') do |f|
       nodelist[0..(num-1)].each do |node|
-        if CORES > 1 then
-          CORES.times{f.puts node }
-        else
-          f.puts node
-        end
+        cores.times{f.puts node }
       end
     end
 
-    `ruby deploy_NAS_on_cluster.rb #{num*CORES} #{RUNS}`
+    `ruby deploy_NAS_on_cluster.rb #{num*cores} #{RUNS}`
   end
 
   `mkdir -p real_k#{kernel}`
