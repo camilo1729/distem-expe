@@ -38,7 +38,7 @@ Net::SCP.start(nodes.first,'root') do |scp|
 end
 
 
-# Compiling on the fist machine
+# Compiling on the first machine
 TAU_MAKE = "/usr/local/tau-install/x86_64/lib/Makefile.tau-mpi-pdt"
 
 # Reading the benchs to deploy
@@ -83,7 +83,9 @@ Net::SSH.start(nodes.first, 'root') do |ssh|
     log.info "Starting run: #{iteration+1}/#{RUNS}"
     binaries.each do |binary|
       log.info "Executing binary: #{binary}"
-      ssh.exec!("mpirun  --mca btl self,sm,tcp --machinefile machine_file #{binary}")
+      mpi_cmd = "mpirun  --mca btl self,sm,tcp --machinefile machine_file #{binary}"
+      mpi_cmd = "timeout #{metadata[:timeout]} " + mpi_cmd if metadata[:timeout]
+      ssh.exec!(mpi_cmd)
       log.info "Getting the profile files"
       profile_dir = "profile-#{binary}-#{Time.now.to_i}"
       Dir.mkdir profile_dir
