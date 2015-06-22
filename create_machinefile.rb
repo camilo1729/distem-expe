@@ -19,7 +19,7 @@ Distem.client do |cl|
 end
 
 # reducing the number of nodes
-iplist = iplist[0..(numnodes-1)] if numnodes > 1
+iplist = iplist[0..(numnodes-1)] if numnodes > 0
 
 puts "Generating machine file"
 File.open("machine_file",'w+') do |f|
