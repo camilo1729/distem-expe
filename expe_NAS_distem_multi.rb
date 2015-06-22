@@ -79,7 +79,7 @@ VNODES_TESTS.each do |vnodes|
     end
 
     MACHINES_TESTS.each do |num|
-      log.info ssh.exec!("ruby create_machinefile.rb 0 #{num}")
+      log.info ssh.exec!("ruby create_machinefile.rb #{CORES} #{num}")
       log.info "Verifying connectivity"
       log.info "Running bench with #{num}"
       log.debug ssh.exec!("for i in $(cat machine_file); do ssh $i hostname; done")
