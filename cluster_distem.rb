@@ -35,6 +35,9 @@ optparse = OptionParser.new do |opts|
     options[:net] = c
   end
 
+  opts.on( '-a', '--arp', 'pre-fill ARP tables' ) do |c|
+    options[:arp] = true
+  end
 
 end
 
@@ -102,6 +105,8 @@ Distem.client do |cl|
   start_time = Time.now
 
   cl.wait_vnodes()
+
+  cl.set_global_arptable() if options[:arp]
 
   puts "Initialization of containers took #{(Time.now-start_time).to_f}"
 
