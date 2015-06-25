@@ -2,7 +2,7 @@
 
 require 'distem'
 
-new_cpu_freq = ARGV[0].to_i
+new_cpu_freq = ARGV[0].to_f
 
 # Updates the values of cpu frequency
 
