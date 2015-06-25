@@ -76,8 +76,7 @@ VNODES_TESTS.each do |vnodes|
     else
       log.info ssh.exec!("ruby cluster_distem.rb -i #{LXC_IMAGE_PATH} -n #{vnodes} -r 1 -c #{CORES} --net #{expe_net}")
     end
-
-    log.info ssh.exec!("ruby create_machinefile.rb")
+    log.info ssh.exec!("ruby create_machinefile.rb #{CORES}")
     log.info "Verifying connectivity"
     log.debug ssh.exec!("for i in $(cat machine_file); do ssh $i hostname; done")
     lines = ssh.exec!("wc -l machine_file")
