@@ -1,0 +1,972 @@
+#+TITLE: Performance Evaluation of Containers for HPC
+#+AUTHOR: Cristian Ruiz, Emmanuel Jeanvoine and Lucas Nussbaum \\ \vspace{0.5cm} INRIA Nancy, France
+#+EMAIL:     {Cristian.Ruiz}@inria.fr
+#+DATE:
+
+#+OPTIONS: H:2
+#+BEAMER_COLOR_THEME:
+#+BEAMER_FONT_THEME:
+#+BEAMER_HEADER:
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+BEAMER_INNER_THEME:
+#+BEAMER_OUTER_THEME:
+#+BEAMER_THEME: default
+#+LATEX_CLASS: beamer
+
+
+#+OPTIONS:   H:2 toc:nil
+
+#+LATEX_HEADER: \usepackage{multirow}
+#+LaTeX_HEADER: \usepackage{minted}
+#+LaTeX_HEADER: \usepackage{fontspec}
+#+LaTeX_HEADER: \usepackage{graphicx}
+#+LaTeX_HEADER: \usepackage{subcaption}
+#+latex_header: \newminted{ruby}{fontsize=\scriptsize}
+#+latex_header: \usepackage{./theme/beamerthemeCristian}
+#+latex_header: \usepackage[nocolor]{./theme/beamerAlvinMacros}
+#+latex_header: \usepackage[absolute,overlay]{textpos}
+#+latex_header: \setlength{\TPHorizModule}{\paperwidth}
+#+latex_header: \setlength{\TPVertModule}{\paperheight}
+#+latex_header: \textblockorigin{0mm}{0mm}
+# #+latex_header: \documentclass[unknownkeysallowed]{beamer}
+#+LATEX_HEADER: \usepackage{natbib}
+#+LATEX_HEADER: \usepackage{bibentry}
+#+LATEX_HEADER: \usepackage{dirtree}
+#+LATEX_HEADER: \newcommand\Fontvi{\fontsize{6}{7.2}\selectfont}
+#+LATEX_HEADER: \nobibliography*
+#+BIND: org-latex-title-command ""
+#+LATEX_HEADER: \usepackage{appendixnumberbeamer}
+#+BEGIN_LaTeX
+
+
+
+\sloppy
+\frame{
+  \thispagestyle{empty}
+  \titlepage
+  \begin{center}
+    \includegraphics[height=1.2cm]{logos/inr_logo_sans_sign_coul.png}
+    \hspace{0.5cm}
+  \insertlogo{\includegraphics[height=1.2cm]{logos/grid5000.png}}
+   \hspace{0.5cm}
+  \insertlogo{\includegraphics[height=1.2cm]{logos/logo_loria_complet_couleur.pdf}}
+  \end{center}
+
+}
+
+#+END_LaTex
+
+#+LaTeX: \tableofcontents
+
+
+
+* Introduction
+
+** Linux Containers
+
+   :PROPERTIES:
+   :BEAMER_OPT:
+   :END:
+
+
+#+BEGIN_LaTeX
+\par {\usebeamerfont{title} Container based virtualization}\par
+\vspace{1cm} %\hfill
+
+#+END_LaTeX
+
+
+** Containers
+
+- *Containers* refers generally to *Operating-system-level virtualization*,
+  where the *kernel* of an operating system allows for multiple isolated *user-space instances*.
+
+#+BEGIN_LaTeX
+\begin{figure}[!h]
+  \center
+  \includegraphics[scale=0.65]{figures/lxc-vm.jpg}
+  \label{fig:hpc}
+\end{figure}
+#+END_LaTeX
+
+** Implementations
+
+- Chroot
+- Linux-VServer
+- FreeBSD Jails
+- Solaris Containers
+- OpenVZ
+- Linux-Containers (LXC)
+
+** /namesapces and cgroups/
+
+Both features incorporated in Linux kenerl since 2006 (Linux 2.6.24).
+Several container solutions: LXC, Docker, libcontainer, systemd-nspawn.
+
+#+BEGIN_LaTeX
+\begin{figure}[!h]
+  \center
+  \includegraphics[scale=0.20]{figures/libcontainer-diagram.png}
+  \label{fig:hpc}
+\end{figure}
+#+END_LaTeX
+
+/libcontainer/ *will become the standard to manage containers*
+
+
+
+* State of the art
+** Virtualization solutions for HPC
+
+- Youssef et al\cite{Youseff:2006:EPI:1308175.1308346} evaluated Xen using HPC
+  Challenge benczhmarks and LLNL ASC Purple benchmarks.
+
+- Nussbaum et al\cite{nussbaum2009linux} compared Xen and KVM using
+  micro-benchmarks and the HPC Challenge benchmarks.
+
+- Regola et al\cite{regola2010recommendations} focuses on the I/O
+  performance of Xen, KVM and OpenVZ.
+
+- Public Cloud platforms: Amazon EC2 \cite{5353067} and Microsoft Azure\cite{Tudoran:2012:PEA:2168697.2168701}
+  have been evaluated using Intel MPI benchmarks and scientific applications.
+
+** Container performance evaluation
+
+- Matthews et al\cite{matthews2007quantifying} compared the performance of VMWare,
+  Xen, Solaris containers and OpenVZ using custom benchmarks.
+- Felter et al\cite{ibmtrdocker} evaluated the I/O performance of Docker using MySQL
+  Linpack, Stream, RandomAccess, nuttcp, netperf, fio, and Redis.
+- Walter et al\cite{4482796} compared VMWare Server, Xen and OpenVZ using NetPerf, IOZone, and the NAS Parallel Benchmarks.
+
+- Xavier et al\cite{6498558} compared Linux VServer, OpenVZ,
+  LXC and Xen using the HPC Challenge benchmarks and the NAS
+  Parallel Benchmarks.
+
+** In this work, we answer:
+
+   :PROPERTIES:
+   :BEAMER_OPT:
+   :END:
+
+
+
+- What is the overhead of oversubscription using different versions of Linux kernel?
+- What is the performance of inter-container communication?
+- What is the impact of moving an HPC workload with several MPI processes per machine, to containers?
+- Our experimental setup included up to 64 machines.
+
+
+
+* Experimental evaluation
+
+** Experimental setup
+
+*** Hardware
+Cluster in Grid'5000 Testbed\cite{grid5000} where each node is equipped with two Intel Xeon E5-2630v3 processors (with 8 cores each), 128 GB of RAM and
+a 10 Gigabit Ethernet adapter.
+
+*** Software
+Debian Jessie, Linux kernel versions: 3.2, 3.16 and 4.0, TAU version 2.23.1, OpenMPI version 1.6.5 and NPB version 3.3.
+We wrote recipes\footnote{https://github.com/camilo1729/distem-recipes} to install the necessary software using
+Kameleon\cite{Ruiz:2015:RSA:2723872.2723883}.
+
+We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU\cite{Shende06thetau}.
+
+** Linux kernel version
+
+
+#+BEGIN_LaTeX
+\begin{figure}[!h]
+  \center
+  \includegraphics[scale=0.40]{figures/execution_time-kernel-cgB.pdf}
+  \label{fig:hpc}
+\end{figure}
+#+END_LaTeX
+
+** Oversubscription
+
+#+BEGIN_LaTeX
+\begin{figure}[!h]
+  \center
+  \includegraphics[scale=0.40]{figures/execution_time-tso-40.pdf}
+  \label{fig:hpc}
+\end{figure}
+#+END_LaTeX
+
+
+** Linux kernel version and oversubscription
+
+- Overall, we observed a maximum performance gain of around 77%
+  when passing from 3.2 to 3.16 and 11% when passing form 3.16 to 4.0.
+
+- Regarding Linux 4.0, there is not significant difference between running 1 or 2 container per physical machine.
+
+** Inter-container communication
+
+- 1 physical node: /container/ and /SM/
+- 8 physical nodes: /native/
+
+All running the equivalent number of MPI processes.
+
+#+BEGIN_LaTeX
+\begin{figure}[H]
+  \centering
+\begin{subfigure}[b]{0.42\textwidth}
+    \includegraphics[scale=0.25,angle=0]{figures/inter-container-mgC.pdf}
+    \caption{CG Class B}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.42\textwidth}
+    \includegraphics[scale=0.25,angle=0]{figures/inter-container-isC.pdf}
+    \caption{IS Class C}
+  \end{subfigure}
+\end{figure}
+#+END_LaTeX
+
+** Inter-container communication
+
+- Although inter-container communication is faster
+  than communication among physical machines, there is an important degradation
+  of the CPU performance for applications that are memory bound.
+
+- Virtual network device does not add an extra cost.
+
+** Multinode inter-container communication
+
+- 16 MPI processes were run per physical machine or container
+- We used a maximum of 32 physical machines.
+#+BEGIN_LaTeX
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{0.42\textwidth}
+    \includegraphics[scale=0.25,angle=0]{figures/veth_overhead-tso-cgB.pdf}
+    \caption{CG Class B}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.42\textwidth}
+    \includegraphics[scale=0.25,angle=0]{figures/veth_overhead-tso-ftB.pdf}
+    \caption{FT Class B}
+  \end{subfigure}
+\end{figure}
+
+#+END_LaTeX
+
+* Conclusions
+* Bibliography
+** Bibliography
+
+#+BEGIN_LaTeX
+
+\bibliography{distem_validation.bib}
+\bibliographystyle{plain}
+\appendix
+#+END_LaTeX
+
+
+* info 								   :noexport:
+
+** Grid'5000
+
+
+
+A large-scale, shared testbed supporting high-quality,
+reproducible research on distributed systems:
+
+- Configurable.
+- High Performance Computing, Grids, Peer-to-peer systems, Cloud computing.
+
+*** image							      :BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.5
+    :END:
+
+#+BEGIN_LaTeX
+\begin{figure}[!h]
+  \center
+  \includegraphics[scale=0.33]{figures/hpc.png}
+  \label{fig:hpc}
+\end{figure}
+#+END_LaTeX
+
+** Current status
+
+
+
+*** It counts with 					      :B_block:BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.5
+    :BEAMER_env: block
+    :END:
+- 10 sites
+- 24 clusters
+- 1006 nodes
+- 8014 cores
+- Diverse technologies
+  + Intel (65%), AMD (35%)
+  + CPUs from one to 12 cores
+  + Ethernet 1G, 10G
+  + Infiniband {S, D, Q}DR
+  + Two GPU clusters
+  + 2 Xeon Phi
+  + 2 data clusters (3-5 disks/node)
+*** image							      :BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.5
+    :END:
+
+#+BEGIN_LaTeX
+\begin{figure}[!h]
+  \center
+  \includegraphics[scale=0.33]{figures/grid5000.png}
+  \label{fig:g5k}
+\end{figure}
+#+END_LaTeX
+
+
+** Available tools and services for experimenting
+
+- OAR[fn:oar]: Resource reservation.
+- Kadeploy[fn:kadeploy]: Operating system provisioning.
+- Kavlan[fn:kavlan]: Network isolation.
+- Distem[fn:distem]: Distributed systems emulator.
+
+[fn:oar] https://oar.imag.fr/
+[fn:kadeploy] http://kadeploy3.gforge.inria.fr/
+[fn:kavlan] https://www.grid5000.fr/mediawiki/index.php/KaVLAN
+[fn:distem] http://distem.gforge.inria.fr
+
+** Putting everything together Grid'5000 API			   :noexport:
+
+- Individual services & command-line interfaces are painful
+
+- REST API for each Grid'5000 service
+  + Reference API 	versioned description of Grid'5000 resources
+  + Monitoring API 	state of Grid'5000 resources
+  + Metrology API 	access to data probes’ output (ganglia, hdf5, …)
+  + Jobs API 		OAR interface
+  + Deployments API 	Kadeploy interface
+  + User API  		managing the user base
+
+- Foundation for several advanced experiment management tools
+
+** Improving control and description of experiments
+
+- Legacy way of performing experiments: shell commands
+ + time-consuming
+ + error-prone
+ + details tend to be forgotten over time
+
+- Promising solution: automation of experiments
+- First step: Grid'5000 REST API[fn:g5k-api]
+  + Jobs API OAR interface
+  + Deployments API Kadeploy interface
+  + Resource selection
+
+[fn:g5k-api] https://api.grid5000.fr
+
+** Tools for automation of experiments
+
+Projects around Grid'5000:
+
+- g5k-campaign[fn:g5k-campaign]: A tool to launch campaigns on Grid'5000.
+- Expo[fn:expo]: Experiment Engine for Distributed Platforms.
+- XpFlow[fn:xpflow]: Experiment Engine based on Business Process Modeling.
+- Execo [fn:execo]: Execo is a Python library for prototyping experiments on distributed systems.
+
+[fn:g5k-campaign] http://g5k-campaign.gforge.inria.fr/
+[fn:expo] http://expo.gforge.inria.fr/
+[fn:xpflow] http://xpflow.gforge.inria.fr/
+[fn:execo] http://execo.gforge.inria.fr
+
+
+
+** For this presentation
+
+   :PROPERTIES:
+   :BEAMER_OPT:
+   :END:
+
+#+BEGIN_LaTeX
+\par {\usebeamerfont{title} ADT COSETTE}\par
+\vspace{1cm} %\hfill
+
+#+END_LaTeX
+
+** Goal of the ADT COSETTE
+
+   Conceive, consolidate and extend a set of tools
+   aimed at experimenting with distributed systems
+   (Cloud, Grid, HPC, P2P).
+
+*** Tasks
+    - Development of Ruby-Cute, a library that gathers useful
+      procedures for experimenting with distributed systems.
+    - Port Kadeploy, Distem and XpFlow over Ruby-cute.
+    - Extend Distem to meet Cloud and HPC research requirements.
+#    - Diffusion of experiment management tool XpFlow.
+
+*** Supervised by
+
+Lucas Nussbaum, Emmanuel Jeanvoine
+
+
+** Ruby Based projects:
+
+Considerable amount of tools developed in Ruby[fn:ruby]:
+
+- g5k-campaign
+- Expo
+- XpFlow
+- Kadeploy
+- Distem
+
+Common components:
+
+- Grid'5000 services interaction.
+- Execution of commands in parallel.
+- File transmission.
+
+*Each tool implements its own version of those components.*
+
+[fn:ruby] https://www.ruby-lang.org
+
+** Ruby-Cute
+
+- It is an effort for refactoring code present in several tools.
+- It is a set of Commonly Used Tools for Experiments.
+- In the context of development of experiment software on distributed systems testbeds such as Grid'5000.
+
+
+
+** Ruby-Cute overview
+
+Ruby-Cute is so far composed of the following modules:
+
+- G5K module: offers useful methods for interacting with Grid'5000 REST API.
+- TakTuk module: is a wrapper for TakTuk parallel executor.
+- Net-multi-ssh module: parallel executor based on SSH.
+
+*Ruby-Cute version 0.3 released*
+
+** G5K Module
+*** It counts with 					      :B_block:BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.5
+    :END:
+
+#+BEGIN_SRC json
+{
+"uid": 604692,
+ "user_uid": "name",
+ "user": "name",
+ "walltime": 3600,
+ "queue": "default",
+ "state": "running",
+ "project": "default",
+ "name": "rubyCute job",
+ "types": ["deploy"],
+ "items": 10,
+ "links": [
+    {
+      "rel": "self",
+      "href": "/sid/sites/nancy/jobs/604692",
+      "type": "app/vnd.grid5000.item+json"
+    },
+    {
+      "rel": "parent",
+      "href": "/sid/sites/nancy",
+      "type": "app/vnd.grid5000.item+json"
+    }
+  ],
+}
+
+#+END_SRC
+
+*** image							      :BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.5
+    :END:
+
+
+
+
+#+BEGIN_LaTeX
+\begin{figure}[!h]
+  \center
+  \includegraphics[scale=0.33]{figures/g5k_module_architecture.pdf}
+  \label{fig:g5k}
+\end{figure}
+#+END_LaTeX
+
+** TakTuk Module
+
+TakTuk is a powerful and scalable parallel command executor.
+
+- It can scale to thousand of nodes.
+- Very customizable:
+  + Deployment options and commands.
+  + Different streams: connector, error, output, state, status.
+
+#+BEGIN_SRC sh
+ taktuk --connector ssh --login root -o output="$host/$type/0:$line\n" \
+-o error="$host/$type/0:$line\n" -o status="$host/$type/0:$line\n"
+#+END_SRC
+
+- Need for:
+  + Automatize the generation of long command line parameters.
+  + A more friendly user interface.
+  + Manage of results.
+
+** TakTuk Module
+
+- A Ruby wrapper for TakTuk command was already present in Kadeploy.
+- This wrapper was improved, documented and integrated into Ruby-Cute.
+
+#+BEGIN_SRC ruby
+require 'cute/taktuk'
+
+results = {}
+Cute::TakTuk.start(['host1','host2','host3'],:user => "root") do |tak|
+     tak.exec("df")
+     results = tak.exec!("hostname")
+     tak.exec("ls -l")
+     tak.exec("sleep 20")
+     tak.loop()
+     tak.exec("tar xvf -")
+     tak.input(:file => "test_file.tar")
+end
+#+END_SRC
+** Net-Multi-SSH
+
+Ruby library to execute commands in parallel using SSH protocol.
+
+- This library was extended to enable the handling of results.
+
+#+BEGIN_SRC ruby
+
+require 'cute/net-ssh'
+
+res = {}
+Net::SSH::Multi.start do |session|
+
+   session.use 'user1@host1'
+   session.use 'user2@host2'
+   session.exec "uptime"
+
+   # execute command, blocks and capture the output
+   res = session.exec! "date"
+   # execute commands on a subset of servers
+   session.exec "hostname"
+end
+puts res #=> {"node3"=>{:stdout=>"Wed Mar 11 12:38:11 UTC 2015", :status=>0},
+         #    "node1"=>{:stdout=>"Wed Mar 11 12:38:11 UTC 2015", :status=>0}, ...}
+#+END_SRC
+
+
+
+
+** Examples
+#+BEGIN_SRC ruby
+require 'cute'
+
+g5k = Cute::G5K::API.new()
+
+job = g5k.reserve(:nodes => 10, :site => 'grenoble',
+                   :walltime => '00:40:00', :env => 'wheezy-x64-base')
+
+cores = job['resources_by_type']['cores']
+
+File.open("machines",'w+') do |f|
+  cores.each{ |node| f.puts node }
+end
+
+Net::SCP.start(nodes.first,'root') do |scp|
+   scp.upload "machines", "machines"
+   scp.upload "/tmp/NAS.tar", "/tmp/NAS.tar"
+end
+
+Net::SSH.start(nodes.first, 'root') do |ssh|
+  ssh.exec!("mpirun  --mca self,sm,tcp --machinefile machines #{BIN_BENCH}")
+end
+
+#+END_SRC
+
+
+** Good Practices Followed
+
+- Documentation embedded in the source code using YARD[fn:yard].
+
+#+BEGIN_SRC ruby
+
+      # Returns information of all my jobs submitted in a given site.
+      # You can specify another state like this:
+      #
+      # = Example
+      #    get_my_jobs("nancy", state="waiting")
+      # Valid states are specified in {https://api.grid5000.fr/doc/4.0/reference/spec.html Grid'5000 API spec}
+      # @return [Array] all my submitted jobs to a given site and their associated deployments.
+      # @param site [String] a valid Grid'5000 site name
+      def get_my_jobs(site, state = "running")
+        jobs = get_jobs(site, g5k_user, state)
+        deployments = get_deployments(site, g5k_user)
+        # filtering deployments only the job in state running make sense
+        jobs.map{ |j| j["state"] == "running"}
+        return jobs
+      end
+
+#+END_SRC
+
+[fn:yard] http://yardoc.org/
+
+** Good Practices Followed
+
+Tests implemented using Rspec[fn:rspec].
+
+#+BEGIN_SRC ruby
+
+require 'spec_helper'
+
+describe Cute::G5K::API do
+
+  subject { g5k = Cute::G5K::API.new() }
+
+  it "raises argument errors" do
+    job = Cute::G5K::G5KJSON.new
+    expect {subject.deploy(job)}.to raise_error(ArgumentError)
+  end
+
+  it "includes deploy type" do
+    job = subject.reserve(:site => @rand_site, :type => :deploy )
+    expect(job).to include("types" => ["deploy"])
+  end
+
+end
+#+END_SRC
+
+
+[fn:rspec] http://rspec.info/
+
+** Testing Ruby-Cute
+
+I spent a lot of time writing tests.
+WebMock[fn:webmock] for testing HTTP requests.
+
+#+BEGIN_SRC ruby
+
+RSpec.configure do |config|
+
+  media_type = FakeG5KResponse.new
+  config.before(:each) do
+
+    stub_request(:any,/^https:\/\/.*\:.*@api.grid5000.fr\/.*/).
+      to_return(:status => 200, :body => media_type.to_json)
+
+    stub_request(:any,/^https:\/\/fake:fake@api.grid5000.fr\.*/).
+      to_return(:status => 401)
+
+    stub_request(:post, /^https:\/\/.*\:.*@api.grid5000.fr\/.*/).
+      with(:body => hash_including("environment" => "nonsense")).
+      to_return(:status => 500, :body => "Invalid environment specification")
+  end
+end
+#+END_SRC
+
+[fn:webmock] https://github.com/bblimke/webmock
+
+
+** Distem
+
+*** An emulator for distributed systems
+
+- Take your *real application* and run it on a *cluster* and
+  use *Distem* to *alter the platform* so it *matches the
+  experimental conditions you need*.
+
+- Uses system level virtualization (LXC)[fn:lxc].
+- High scalability 40000 nodes emulated over 100 nodes.
+
+[fn:lxc] https://linuxcontainers.org/
+*** image
+    :PROPERTIES:
+    :BEAMER_col: 0.9
+    :END:
+
+#+BEGIN_LaTeX
+\begin{figure}[!h]
+  \center
+  \includegraphics[scale=0.25]{figures/distem.png}
+  \label{fig:distem}
+\end{figure}
+#+END_LaTeX
+
+
+
+** Goal
+
+   :PROPERTIES:
+   :BEAMER_OPT:
+   :END:
+
+
+#+BEGIN_LaTeX
+\par {\usebeamerfont{title} Validate suitability of distem for HPC}\par
+\vspace{1cm} %\hfill
+
+#+END_LaTeX
+
+
+
+** Approach
+
+- Run and profile HPC benchmarks based on MPI in real and emulated platform.
+
+- Collect and analyze the generated profiles to observe what it is happening with different sizes
+  of emulated platforms.
+
+*** Challenges
+
+- It is desirable that all tests be reproducible.
+- Manage complex software stacks:
+  - Linux system with different kernel versions: 3.2, 3.16, 4.0.
+  - MPI middleware
+  - Build tools
+  - TAU profiling
+  - Benchmarks
+- Same software stack for LXC and real machines.
+- Automatize the workflow.
+
+
+** Validation Workflow
+#+BEGIN_LaTeX
+\begin{figure}[!h]
+  \center
+  \includegraphics[scale=0.4]{figures/workflow.pdf}
+  \label{fig:g5k}
+\end{figure}
+#+END_LaTeX
+
+
+** Kameleon
+
+It is a tool for building *reproducible software stacks*.
+- Create software appliances for a large variety of technologies:
+  Docker[fn:docker], Kadeploy, QEMU[fn:qemu], Vagrant[fn:vagrant], VirtualBox[fn:vbox].
+- Checkpoint mechanism.
+- Breakpoints, interactive execution
+- Extend mechanism.
+- Persistent cache.
+
+[fn:docker] https://www.docker.com/
+[fn:qemu] http://wiki.qemu.org
+[fn:vagrant] https://www.vagrantup.com/
+[fn:vbox] https://www.virtualbox.org/
+
+** Recipes (YAML syntax)
+
+#+BEGIN_SRC yaml
+
+extend: default/vagrant/debian8.yaml
+# extend: default/docker/debian8.yaml
+# extend: default/grid5000/debian8.yaml
+global:
+   mpi_path: "/usr/local/"
+bootstrap:
+  - "@base"
+
+setup:
+  - "@base"
+  - install_software:
+    - packages: >
+       g++ make taktuk openssh-server libc6-dev-i386
+       openmpi-bin openmpi-common libopenmpi-dev
+       ruby git r-base ess emacs
+       texlive-latex-recommended texlive-latex-base
+       texlive-latex-extra latexmk
+
+  - tau_install
+export:
+  - "@base"
+#+END_SRC
+
+
+
+
+** Syntax
+
+#+BEGIN_SRC yaml
+
+- tau_version: "2.22.2"
+- pdt_version: "3.19"
+- get_tau:
+  - exec_in: |
+       cd /tmp/
+       wget  -q http://www.cs.uoregon.edu/tau/tau-$$tau_version.tar.gz
+       wget -q http://www.cs.uoregon.edu/pdt/pdt-$$pdt_version.tar.gz
+
+- pdt_install:
+  - exec_in: |
+       cd /tmp/
+       tar -xzf pdt-$$pdt_version.tar.gz
+       cd /tmp/pdtoolkit-$$pdt_version
+       ./configure -prefix=/usr/local/pdt-install
+       make clean install
+
+- tau_install:
+  - exec_in: |
+       cd /tmp/
+       tar -xzf tau-$$tau_version.tar.gz
+       cd /tmp/tau-$$tau_version
+       ./configure -prefix=/usr/local/tau-install -pdt=/usr/local/pdt-install/ -mpiinc=/usr/lib/openmpi/include/ -mpilib=/usr/lib/openmpi/lib/
+       make install
+
+- cleaning:
+  - exec_in: rm -rf /tmp/tau*
+  - exec_in: rm -rf /tmp/pdt*
+
+#+END_SRC
+
+** Try it out
+
+Project home page:
+- http://kameleon.imag.fr/
+
+Github repository:
+- https://github.com/oar-team/kameleon
+
+For installing it:
+
+#+BEGIN_SRC sh
+
+ $ gem install kameleon-builder
+
+#+END_SRC
+
+** Kameleon command
+
+Build a virtual machine based on debian:
+
+#+BEGIN_SRC sh
+
+ $ kameleon template repo add default https://github.com/oar/kameleon-recipes.git
+
+ $ kameleon new debian_vim default/virtualbox/debian7
+
+ $ kameleon build debian_vm.yaml
+
+#+END_SRC
+
+Generating a cache:
+
+#+BEGIN_SRC sh
+
+$ kameleon build debian_vm.yaml --enable-cache
+
+#+END_SRC
+
+From a cache:
+
+#+BEGIN_SRC sh
+
+$ kameleon build debian_vm.yaml --from-cache=debian_vm-cache.tar
+
+#+END_SRC
+
+** The end
+
+   :PROPERTIES:
+   :BEAMER_OPT:
+   :END:
+
+#+BEGIN_LaTeX
+\vspace{3cm}
+\par {\usebeamerfont{title} {\center Thank you} }\par
+\vspace{3cm}\hfill
+
+#+END_LaTeX
+
+** Constructing Reproducible software stacks
+
+#+BEGIN_LaTeX
+\begin{figure}[!h]
+  \center
+  \includegraphics[scale=0.55]{figures/Kameleon_overview.pdf}
+  \caption{Kameleon in few words}
+  \label{fig:kameleon_overview}
+\end{figure}
+
+#+END_LaTeX
+
+** Recipe structure
+*** It counts with 					      :B_block:BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.5
+    :END:
+
+#+BEGIN_LaTeX
+\renewcommand*\DTstyle{\tiny\ttfamily\textcolor{red}}
+\DTsetlength{0.2em}{1em}{0.2em}{0.4pt}{1.6pt}
+\setlength{\DTbaselineskip}{10pt}
+\dirtree{%
+.1 default.
+.2 base.
+.3 steps.
+.4 aliases.
+.4 bootstrap.
+.5 debian.
+.4 data.
+.4 setup.
+.5 debian.
+.2 docker.
+.3 steps.
+.4 bootstrap.
+.4 checkpoints.
+.4 setup.
+.5 debian.
+.2 grid5000.
+.3 steps.
+.4 bootstrap.
+.4 export.
+.2 vagrant.
+.3 steps.
+.4 export.
+.4 setup.
+.5 debian.
+}
+#+END_LaTeX
+
+
+
+*** image 							      :BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.5
+    :END:
+
+#+BEGIN_LaTeX
+\renewcommand*\DTstyle{\tiny\ttfamily\textcolor{blue}}
+\DTsetlength{0.2em}{1em}{0.2em}{0.4pt}{1.6pt}
+\setlength{\DTbaselineskip}{10pt}
+\dirtree{%
+.1 default.
+.2 base.
+.3 debian.yaml.
+.3 steps.
+.4 aliases.
+.5 defaults.yaml.
+.4 bootstrap.
+.5 debian.
+.6 debootstrap-yaml.
+.4 setup.
+.5 debian.
+.6 configure-apt.
+.6 configure-network.yaml.
+.6 install-software.yaml.
+.4 ssh-config.yaml.
+.4 tau-install.yaml.
+.2 docker.
+.3 debian7.yaml.
+.3 steps.
+.4 bootstrap.
+.5 prepare-docker.yaml.
+.5 start-docker.yaml.
+}
+#+END_LaTeX

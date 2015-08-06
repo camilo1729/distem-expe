@@ -1,0 +1,114 @@
+\ProvidesPackage{beamerthemeCristian}[2014/05/19 ver 0.1]
+%% Based on Alvin theme
+\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+
+\RequirePackage{ifthen}
+
+
+%% \usecolortheme[rgb={0.7,0.2,0.2}]{structure}
+%% \usefonttheme[onlymath]{serif}
+
+\useoutertheme{default}
+\useinnertheme{circles}
+
+
+% %\pgfdeclareimage[height=0.3cm]{id-logo}{logo_id}
+% \def\idlogo{\includegraphics[height=0.3cm]{logo_id.pdf}}
+% \DeclareOption{inria}{%
+%   %\pgfdeclareimage[height=0.3cm]{my-logo}{logo_inrialpes}
+%   \def\mylogo{\includegraphics[height=0.3cm]{logo_inrialpes.pdf}}
+% }
+% \DeclareOption{ujf}{%
+% %  \pgfdeclareimage[height=0.3cm]{my-logo}{logo_ujf}
+%   \def\mylogo{\includegraphics[height=0.3cm]{logo_ujf.pdf}}
+% }
+% \DeclareOption{cnrs}{%
+% %  \pgfdeclareimage[height=0.3cm]{my-logo}{logo_cnrs}
+%   \def\mylogo{\includegraphics[height=0.3cm]{logo_cnrs.pdf}}
+% }
+% \ProcessOptions
+\usenavigationsymbolstemplate{\hbox{%
+     \hbox{\insertframenavigationsymbol}
+  }}
+
+\def\bgcolor@alvin{orange!75!green!35!white!90}
+%%\useoutertheme{shadow}
+%% \beamertemplateshadingbackground{white!100}{\bgcolor@alvin}
+%% \AtBeginDocument{
+%%   \pgfdeclareverticalshading{beamer@topshade}{\paperwidth}{%
+%%     color(0pt)=(\bgcolor@alvin);
+%%     color(4pt)=(red!40!black!90,1)}
+%% }
+
+%%%%%%%%%%%%%%% Trying Font definitions %%%%%%%%%%%%%%%%%%%%%
+\definecolor{basicallyblack}{HTML}{2E2E2E}
+\definecolor{darkgrey}{HTML}{6A6A6A}
+\definecolor{lightgrey}{HTML}{C1C1C1}
+\definecolor{dirtywhite}{HTML}{DEDEDE}
+\definecolor{cream1970s}{HTML}{E0E1E8}
+\definecolor{base16white}{HTML}{F5F5F5}
+\definecolor{nuclearplum}{HTML}{47092E}
+\definecolor{greencamilo}{HTML}{6AB1A3}
+
+\setmainfont{DejaVu Sans}
+\setsansfont{Arial}
+%\setmonofont{Anonymous Pro}
+\setbeamerfont{title}{size=\fontsize{20pt}{25pt},series=\bfseries,family=\rmfamily}
+\setbeamercolor{title}{fg=greencamilo,bg=}
+
+\setbeamerfont{subtitle}{size=\fontsize{16pt}{28pt},series=\bfseries,family=\fontspec{Arial}}
+\setbeamercolor{subtitle}{fg=nuclearplum,bg=}
+
+\setbeamerfont{frametitle}{parent=subtitle}
+\setbeamercolor{frametitle}{parent=title}
+
+\setbeamercolor{imagebox}{bg=darkgrey}
+
+\setbeamercolor{normal text}{bg=, fg=basicallyblack}
+\setbeamercolor{inverted text}{bg=, fg=cream1970s}
+\setbeamercolor{local structure}{fg=nuclearplum}
+
+\setbeamercolor{block title}{bg=red}
+
+\setbeamercolor{background canvas}{bg=cream1970s}
+
+%%%%%%%%%%%%%%%%%\useoutertheme{infolines}%%%%%%%%%%%%%%%%%%%%
+\setbeamercolor*{author in head/foot}{parent=palette tertiary}
+\setbeamercolor*{title in head/foot}{parent=palette secondary}
+\setbeamercolor*{section in head/foot}{parent=palette primary}
+
+\def\inriaproject{INRIA MADYNES TEAM}
+\def\tutelle{VHPC'15}
+\defbeamertemplate*{headline}{infolines theme}{}
+\defbeamertemplate*{footline}{infolines theme}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}~\inriaproject
+  \end{beamercolorbox}%
+
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    %\usebeamerfont{title in head/foot}\insertshorttitle
+    \usebeamerfont{author in head/foot}~\tutelle
+  \end{beamercolorbox}%
+
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{section in head/foot}%
+    \usebeamerfont{section in head/foot}\insertsectionhead\hspace*{1em}\insertframenumber{}~/~\inserttotalframenumber\hspace*{2ex}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%% block appearance %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usecolortheme{whale}
+\usecolortheme{orchid}
+\useinnertheme[shadow=true]{rounded}
+\setbeamerfont{block title}{size={}}
+
+% \date[\raisebox{-0.09cm}{\mylogo%\pgfuseimage{my-logo}
+% }\ \ \ \ MESCAL\ \ \ \raisebox{-0.09cm}{\idlogo
+% %\pgfuseimage{id-logo}
+% }] % (optional, should be abbreviation of conference name)
+% {\ }
+\endinput
