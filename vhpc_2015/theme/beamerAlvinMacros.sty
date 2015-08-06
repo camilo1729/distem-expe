@@ -1,0 +1,130 @@
+\ProvidesPackage{beamerAlvinMacros}[2005/01/31 ver 0.1]
+\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+
+\RequirePackage{ifthen}
+
+\newboolean{nocolor@beamext}
+\setboolean{nocolor@beamext}{false}
+\newboolean{cframe@beamext}
+\setboolean{cframe@beamext}{false}
+\newboolean{fullcite@beamext}
+\setboolean{fullcite@beamext}{false}
+
+\DeclareOption{nocolor}{\setboolean{nocolor@beamext}{true}}
+\DeclareOption{cframe}{\setboolean{cframe@beamext}{true}}
+\DeclareOption{fullcite}{\setboolean{fullcite@beamext}{true}}
+
+\ProcessOptions
+
+% \newcommand{\cframe}[1]{\frame[label=current]{#1}}
+\newenvironment{cframe}{%
+  \begin{frame}[label=current]%
+  }{%
+  \end{frame}%
+}%
+
+\ifthenelse{\boolean{cframe@beamext}}{%
+   \includeonlyframes{current}
+}{
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%% block appearance %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand<>{\concept}[1]{{\color#2{red!75!green}#1}}
+\newcommand<>{\code}[1]{{\color#2{green!25!red!80!black!60}\texttt{#1}}}
+\newcommand<>{\blue}[1]{{\color#2{blue!100!black!100}#1}}
+\newcommand<>{\red}[1]{{\color#2{red!60!black}#1}}
+\newcommand<>{\green}[1]{{\color#2{green!70!black}#1}}
+\newcommand<>{\purple}[1]{{\color#2{blue!50!red}#1}}
+\usepackage{wasysym}
+\def\smiley{\green{\larger[2]\wasyfamily\char44}\xspace}
+\def\frownie{\blue{\larger[2]\wasyfamily\char47}\xspace}
+
+\newcommand{\OutlineName}[1]{\edef\beamext@Outline{#1}}
+\OutlineName{Outline}
+
+\renewcommand{\maketitle}{%
+  \frame{\titlepage}
+}
+
+\let\beamext@tableofcontents=\tableofcontents
+\renewcommand{\tableofcontents}{%
+  \frame{\frametitle{\beamext@Outline}
+%    \tableofcontents[pausesections]%
+    \beamext@tableofcontents%
+  }
+  % Affichage a chaque section du plan
+  \AtBeginSection[]
+  {
+    \frame<handout:0>
+    {
+      \frametitle{\beamext@Outline}
+      \beamext@tableofcontents[current,currentsection]
+    }
+  }
+}
+
+\usedescriptionitemofwidthas{bl}
+%%%% Pour annuler le raggedright introduit dans seminar...
+\def\slide@rightskip{}
+
+%%%% Pour désactiver leur connerie de biblio.
+\ifthenelse{\boolean{fullcite@beamext}}{%
+\def\@bibitem#1{\expandafter\item\beamer@bibstore\@ifundefined{beamerbib@#1@\the\c@framenumber}%
+  {\if@filesw \immediate\write\@auxout
+    {\string\bibcite{#1}{\noexpand\hyperlink{beamerbib#1}{#1}}}\fi%
+    \global\@namedef{beamerbib@#1@\the\c@framenumber}{\relax}%
+    \hypertarget{beamerbib#1}{}}%
+  {}%
+  \def\newblock{\beamer@newblock}\newblock}
+}{
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%% Maths stuff %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\mbold{\mathversion{bold}}
+\def\mnorm{\mathversion{normal}}
+\renewenvironment{definition}[1][]{
+  \begin{block}{\iflanguage{french}{Définition}{Definition}\ifthenelse{\equal{#1}{}}{}{: \mbold\origmath{\textbf{#1}}}.}%
+%        \expandafter\everymath\expandafter{\the\everymath}
+  }{
+  \end{block}
+}
+
+\newcounter{CntThe}
+\resetcounteronoverlays{CntThe}
+\renewenvironment{theorem}[1][]{
+  \refstepcounter{CntThe}
+  \begin{alertblock}{\iflanguage{french}{Théorème}{Theorem} \arabic{CntThe}\ifthenelse{\equal{#1}{}}{}{: \mbold\origmath{\textbf{#1}}}.}%
+  }{
+  \end{alertblock}
+}
+
+\newcounter{CntLem}
+\resetcounteronoverlays{CntLem}
+\renewenvironment{lemma}[1][]{
+  \refstepcounter{CntLem}
+  \begin{alertblock}{\iflanguage{french}{Lemme}{Lemma} \arabic{CntLem}\ifthenelse{\equal{#1}{}}{}{: \mbold\origmath{\textbf{#1}}}.}%
+%        \expandafter\everymath\expandafter{\the\everymath}
+  }{
+  \end{alertblock}
+}
+
+\ifthenelse{\boolean{nocolor@beamext}}{%
+  \newcommand{\origmath}[1]{\ensuremath{#1}}%
+  \newcommand{\Origmath}[1]{#1}%
+}{
+  \expandafter\everymath\expandafter{\the\everymath\color{green!60!red!50!black!100}}% 
+%  \expandafter\everymath\expandafter{\the\everymath\color{green!75!red!100!black!280}}% 
+  \newcommand{\origmath}[1]{{\everymath{}\ensuremath{\everymath{}#1}}}%
+  \newcommand{\Origmath}[1]{{\everymath{}#1}}%
+}
+
+
+\useitemizeitemtemplate{\scriptsize\raise1.25pt\hbox{\color{beamerstructure}\origmath{\blacktriangleright}}}
+\usesubitemizeitemtemplate{\tiny\raise1.5pt\hbox{\color{beamerstructure}\origmath{\blacktriangleright}}}
+\usesubsubitemizeitemtemplate{\tiny\raise1.5pt\hbox{\color{beamerstructure}\origmath{\blacktriangleright}}}
+
+\newcommand{\step}[1]{\uncover<+->{#1}}
+\endinput
