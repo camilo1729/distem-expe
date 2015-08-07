@@ -1,4 +1,4 @@
-% Created 2015-08-06 Thu 16:35
+% Created 2015-08-07 Fri 14:19
 \documentclass[presentation]{beamer}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -34,13 +34,12 @@
 \usepackage{dirtree}
 \newcommand\Fontvi{\fontsize{6}{7.2}\selectfont}
 \nobibliography*
-\usepackage{appendixnumberbeamer}
 \usetheme{default}
 \usecolortheme{}
 \usefonttheme{}
 \useinnertheme{}
 \useoutertheme{}
-\author{Cristian Ruiz, Emmanuel Jeanvoine and Lucas Nussbaum \\ \vspace{0.5cm} INRIA Nancy, France}
+\author{\\ \vspace{0.5cm} Cristian Ruiz, Emmanuel Jeanvoine and Lucas Nussbaum \\ \vspace{0.5cm} INRIA Nancy, France \\ \vspace{0.5cm} VHPC'15}
 \date{}
 \title{Performance Evaluation of Containers for HPC}
 \hypersetup{
@@ -109,8 +108,10 @@ where the \alert{kernel} of an operating system allows for multiple isolated \al
 \end{frame}
 
 \begin{frame}[label=sec-1-4]{\emph{namesapces and cgroups}}
-Both features incorporated in Linux kenerl since 2006 (Linux 2.6.24).
-Several container solutions: LXC, Docker, libcontainer, systemd-nspawn.
+\begin{itemize}
+\item Both features incorporated in Linux kernel since 2006 (Linux 2.6.24).
+\item Several container solutions: LXC, Docker, libcontainer, systemd-nspawn.
+\end{itemize}
 
 \begin{figure}[!h]
   \center
@@ -266,8 +267,80 @@ of the CPU performance for applications that are memory bound.
 \end{figure}
 \end{frame}
 
+\begin{frame}[label=sec-3-8]{Multinode inter-container communication}
+\begin{itemize}
+\item (few MPI calls) we observed a maximum overhead of 5.97\% (with 512 MPI processes).
+\item (many MPI calls) we observed a higher overhead starting from 30\% for the benchmark LU.
+
+\item CG reaches 180\% of overhead when 128 MPI processes are used.
+This benchmarks sends a highly number of MPI messages, around
+a 1000 times more than the first group of benchmarks
+which increase network congestion and leads to TCP timeouts.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[label=sec-3-9]{Multinode inter-container communication}
+\begin{itemize}
+\item It was shown how network bound applications can be severely affected by
+the default container network interconnection.
+
+\item We found a way to alleviate the overhead
+by tweaking parameters of the Linux network stack.
+
+\begin{itemize}
+\item TCP minimum retransmission timeout (RTO)
+\item TCP Selective Acknowledgments (SACK)
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
 \section{Conclusions}
 \label{sec-4}
+\begin{frame}[label=sec-4-1]{In this work \ldots{}}
+\begin{itemize}
+\item We study the impact of using containers in the context of HPC research.
+
+\item We evaluate two interesting uses of containers in the context of HPC research: portability of complex software stacks
+and oversubscription.
+
+\item We carried out the evaluation under a configuration expected to be found in an HPC context.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[label=sec-4-2]{What do we found?}
+\begin{itemize}
+\item The limits of using containers
+\item The type of application that suffer the most
+\item The level of oversubscription containers can deal with without impacting considerably the application performance.
+\item The technology is getting mature and performance issues are being solved with each
+new release of the Linux kernel.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[label=sec-4-3]{Future work}
+\begin{itemize}
+\item Measure the impact of using containers on disk I/O and other
+containers features like memory limitation.
+
+\item The overhead observed could be diminished by integrating
+more advance network interconnection such as Linux's \emph{macvlan}, SR-IOV or OpenvSwitch\footnote{http://openvswitch.org/}.
+\end{itemize}
+\end{frame}
+
+{\setbeamercolor{background canvas}{bg=basicallyblack}
+\usebeamercolor[fg]{inverted text}
+\begin{frame}[label=sec-4-4]{The end}
+
+\vspace{3cm}
+\par {\usebeamerfont{title} {\center Thank you} }\par
+\vspace{3cm}\hfill
+\end{frame}
+}
+
+
+
 \section{Bibliography}
 \label{sec-5}
 \begin{frame}[label=sec-5-1]{Bibliography}

@@ -1,5 +1,5 @@
 #+TITLE: Performance Evaluation of Containers for HPC
-#+AUTHOR: Cristian Ruiz, Emmanuel Jeanvoine and Lucas Nussbaum \\ \vspace{0.5cm} INRIA Nancy, France
+#+AUTHOR: \\ \vspace{0.5cm} Cristian Ruiz, Emmanuel Jeanvoine and Lucas Nussbaum \\ \vspace{0.5cm} INRIA Nancy, France \\ \vspace{0.5cm} VHPC'15
 #+EMAIL:     {Cristian.Ruiz}@inria.fr
 #+DATE:
 
@@ -29,14 +29,12 @@
 #+latex_header: \setlength{\TPHorizModule}{\paperwidth}
 #+latex_header: \setlength{\TPVertModule}{\paperheight}
 #+latex_header: \textblockorigin{0mm}{0mm}
-# #+latex_header: \documentclass[unknownkeysallowed]{beamer}
 #+LATEX_HEADER: \usepackage{natbib}
 #+LATEX_HEADER: \usepackage{bibentry}
 #+LATEX_HEADER: \usepackage{dirtree}
 #+LATEX_HEADER: \newcommand\Fontvi{\fontsize{6}{7.2}\selectfont}
 #+LATEX_HEADER: \nobibliography*
 #+BIND: org-latex-title-command ""
-#+LATEX_HEADER: \usepackage{appendixnumberbeamer}
 #+BEGIN_LaTeX
 
 
@@ -101,8 +99,8 @@
 
 ** /namesapces and cgroups/
 
-Both features incorporated in Linux kenerl since 2006 (Linux 2.6.24).
-Several container solutions: LXC, Docker, libcontainer, systemd-nspawn.
+- Both features incorporated in Linux kernel since 2006 (Linux 2.6.24).
+- Several container solutions: LXC, Docker, libcontainer, systemd-nspawn.
 
 #+BEGIN_LaTeX
 \begin{figure}[!h]
@@ -251,7 +249,71 @@ All running the equivalent number of MPI processes.
 
 #+END_LaTeX
 
+** Multinode inter-container communication
+
+- (few MPI calls) we observed a maximum overhead of 5.97\% (with 512 MPI processes).
+- (many MPI calls) we observed a higher overhead starting from 30\% for the benchmark LU.
+
+- CG reaches 180\% of overhead when 128 MPI processes are used.
+  This benchmarks sends a highly number of MPI messages, around
+  a 1000 times more than the first group of benchmarks
+  which increase network congestion and leads to TCP timeouts.
+
+** Multinode inter-container communication
+
+
+- It was shown how network bound applications can be severely affected by
+  the default container network interconnection.
+
+- We found a way to alleviate the overhead
+  by tweaking parameters of the Linux network stack.
+
+  - TCP minimum retransmission timeout (RTO)
+  - TCP Selective Acknowledgments (SACK)
+
+
 * Conclusions
+** In this work ...
+
+- We study the impact of using containers in the context of HPC research.
+
+- We evaluate two interesting uses of containers in the context of HPC research: portability of complex software stacks
+  and oversubscription.
+
+- We carried out the evaluation under a configuration expected to be found in an HPC context.
+
+** What do we found?
+
+- The limits of using containers
+- The type of application that suffer the most
+- The level of oversubscription containers can deal with without impacting considerably the application performance.
+- The technology is getting mature and performance issues are being solved with each
+  new release of the Linux kernel.
+
+
+** Future work
+
+- Measure the impact of using containers on disk I/O and other
+  containers features like memory limitation.
+
+- The overhead observed could be diminished by integrating
+  more advance network interconnection such as Linux's /macvlan/, SR-IOV or OpenvSwitch\footnote{http://openvswitch.org/}.
+
+** The end
+
+   :PROPERTIES:
+   :BEAMER_OPT:
+   :END:
+
+#+BEGIN_LaTeX
+\vspace{3cm}
+\par {\usebeamerfont{title} {\center Thank you} }\par
+\vspace{3cm}\hfill
+
+#+END_LaTeX
+
+
+
 * Bibliography
 ** Bibliography
 
@@ -871,18 +933,6 @@ $ kameleon build debian_vm.yaml --from-cache=debian_vm-cache.tar
 
 #+END_SRC
 
-** The end
-
-   :PROPERTIES:
-   :BEAMER_OPT:
-   :END:
-
-#+BEGIN_LaTeX
-\vspace{3cm}
-\par {\usebeamerfont{title} {\center Thank you} }\par
-\vspace{3cm}\hfill
-
-#+END_LaTeX
 
 ** Constructing Reproducible software stacks
 
