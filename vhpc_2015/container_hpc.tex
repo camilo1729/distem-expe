@@ -1,4 +1,4 @@
-% Created 2015-08-07 Fri 14:19
+% Created 2015-08-17 Mon 21:40
 \documentclass[presentation]{beamer}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -115,11 +115,9 @@ where the \alert{kernel} of an operating system allows for multiple isolated \al
 
 \begin{figure}[!h]
   \center
-  \includegraphics[scale=0.20]{figures/libcontainer-diagram.png}
+\includegraphics[scale=0.30]{figures/libcontainer-diagram.pdf}
   \label{fig:hpc}
 \end{figure}
-
-\emph{libcontainer} \alert{will become the standard to manage containers}
 \end{frame}
 
 
@@ -129,7 +127,7 @@ where the \alert{kernel} of an operating system allows for multiple isolated \al
 \begin{frame}[label=sec-2-1]{Virtualization solutions for HPC}
 \begin{itemize}
 \item Youssef et al\cite{Youseff:2006:EPI:1308175.1308346} evaluated Xen using HPC
-Challenge benczhmarks and LLNL ASC Purple benchmarks.
+Challenge benchmarks and LLNL ASC Purple benchmarks.
 
 \item Nussbaum et al\cite{nussbaum2009linux} compared Xen and KVM using
 micro-benchmarks and the HPC Challenge benchmarks.
@@ -146,7 +144,7 @@ performance of Xen, KVM and OpenVZ.
 \begin{itemize}
 \item Matthews et al\cite{matthews2007quantifying} compared the performance of VMWare,
 Xen, Solaris containers and OpenVZ using custom benchmarks.
-\item Felter et al\cite{ibmtrdocker} evaluated the I/O performance of Docker using MySQL
+\item Felter et al\cite{ibmtrdocker} evaluated the I/O performance of Docker using MySQL,
 Linpack, Stream, RandomAccess, nuttcp, netperf, fio, and Redis.
 \item Walter et al\cite{4482796} compared VMWare Server, Xen and OpenVZ using NetPerf, IOZone, and the NAS Parallel Benchmarks.
 
@@ -165,8 +163,7 @@ Parallel Benchmarks.
 \begin{itemize}
 \item What is the overhead of oversubscription using different versions of Linux kernel?
 \item What is the performance of inter-container communication?
-\item What is the impact of moving an HPC workload with several MPI processes per machine, to containers?
-\item Our experimental setup included up to 64 machines.
+\item What is the impact of running an HPC workload with several MPI processes inside containers?
 \end{itemize}
 \end{frame}
 }
@@ -178,49 +175,101 @@ Parallel Benchmarks.
 
 \begin{frame}[label=sec-3-1]{Experimental setup}
 \begin{block}{Hardware}
-Cluster in Grid'5000 Testbed\cite{grid5000} where each node is equipped with two Intel Xeon E5-2630v3 processors (with 8 cores each), 128 GB of RAM and
+\begin{itemize}
+\item Cluster in Grid'5000 Testbed\cite{grid5000} where each node is equipped with two Intel Xeon E5-2630v3 processors (with 8 cores each), 128 GB of RAM and
 a 10 Gigabit Ethernet adapter.
+\item Our experimental setup included up to 64 machines.
+\end{itemize}
 \end{block}
 
 \begin{block}{Software}
-Debian Jessie, Linux kernel versions: 3.2, 3.16 and 4.0, TAU version 2.23.1, OpenMPI version 1.6.5 and NPB version 3.3.
-We wrote recipes\footnote{https://github.com/camilo1729/distem-recipes} to install the necessary software using
+\begin{itemize}
+\item Debian Jessie, Linux kernel versions: 3.2, 3.16 and 4.0, TAU, OpenMPI and NPB.
+\item We wrote recipes\footnote{https://github.com/camilo1729/distem-recipes} to install the necessary software using
 Kameleon\cite{Ruiz:2015:RSA:2723872.2723883}.
-
-We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU\cite{Shende06thetau}.
+\item We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU\cite{Shende06thetau}.
+\end{itemize}
 \end{block}
 \end{frame}
 
-\begin{frame}[label=sec-3-2]{Linux kernel version}
-\begin{figure}[!h]
-  \center
-  \includegraphics[scale=0.40]{figures/execution_time-kernel-cgB.pdf}
-  \label{fig:hpc}
-\end{figure}
-\end{frame}
-
-\begin{frame}[label=sec-3-3]{Oversubscription}
-\begin{figure}[!h]
-  \center
-  \includegraphics[scale=0.40]{figures/execution_time-tso-40.pdf}
-  \label{fig:hpc}
-\end{figure}
-\end{frame}
-
-
-\begin{frame}[label=sec-3-4]{Linux kernel version and oversubscription}
+\begin{frame}[label=sec-3-2]{Network setup}
 \begin{itemize}
-\item Overall, we observed a maximum performance gain of around 77\%
-when passing from 3.2 to 3.16 and 11\% when passing form 3.16 to 4.0.
-
-\item Regarding Linux 4.0, there is not significant difference between running 1 or 2 container per physical machine.
+\item \alert{Veth pair + Linux brigde}
+\item Veth pair + OpenVSwitch
+\item MACVLAN
+\item Phys
 \end{itemize}
+
+\begin{figure}[!h]
+  \center
+  \includegraphics[scale=0.4]{figures/lxc-veth.pdf}
+  \label{fig:hpc}
+ % \caption{VETH network}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}[label=sec-3-3]{Linux kernel version}
+32 containers running on: 8,16,32 physical machines.
+
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{block}{Max performance gain}
+
+
+\begin{itemize}
+\item 3.2 -> 3.16 \textasciitilde{}77\%.
+\item 3.16 -> 4.0 \textasciitilde{}11\%.
+\end{itemize}
+\end{block}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+
+
+
+
+\begin{figure}[!h]
+  \center
+  \includegraphics[scale=0.32]{figures/execution_time-kernel-cgB.pdf}
+  \label{fig:hpc}
+  \caption{CG.B}
+\end{figure}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[label=sec-3-4]{Oversubscription}
+64 containers running over: 8,16,32,64 physical machines.
+
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{block}{Results}
+
+\begin{itemize}
+\item Using Linux kernel 4.0, there is not significant difference between running 1 or 2 container per physical machine.
+\end{itemize}
+\end{block}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+
+
+\begin{figure}[!h]
+  \center
+  \includegraphics[scale=0.33]{figures/execution_time-tso-40.pdf}
+  \label{fig:hpc}
+  \caption{LU.B}
+\end{figure}
+\end{column}
+\end{columns}
 \end{frame}
 
 \begin{frame}[label=sec-3-5]{Inter-container communication}
 \begin{itemize}
-\item 1 physical node: \emph{container} and \emph{SM}
-\item 8 physical nodes: \emph{native}
+\item \emph{container} and \emph{SM}: 1 physical node.
+\item \emph{native} : 2, 4, 8 physical nodes.
 \end{itemize}
 
 All running the equivalent number of MPI processes.
@@ -269,11 +318,11 @@ of the CPU performance for applications that are memory bound.
 
 \begin{frame}[label=sec-3-8]{Multinode inter-container communication}
 \begin{itemize}
-\item (few MPI calls) we observed a maximum overhead of 5.97\% (with 512 MPI processes).
-\item (many MPI calls) we observed a higher overhead starting from 30\% for the benchmark LU.
+\item Benchmarks with low  MPI communication: we observed a maximum overhead of \alert{5.97\%} (with \alert{512 MPI processes}).
+\item Benchmarks with an intensive MPI communication: we observed a higher overhead starting from \alert{30\%} for the benchmark LU.
 
-\item CG reaches 180\% of overhead when 128 MPI processes are used.
-This benchmarks sends a highly number of MPI messages, around
+\item CG reaches \alert{180\%} of overhead when \alert{128} MPI processes are used.
+This benchmarks sends a high number of MPI messages, around
 a 1000 times more than the first group of benchmarks
 which increase network congestion and leads to TCP timeouts.
 \end{itemize}
@@ -308,13 +357,12 @@ and oversubscription.
 \end{itemize}
 \end{frame}
 
-\begin{frame}[label=sec-4-2]{What do we found?}
+\begin{frame}[label=sec-4-2]{What did we find?}
 \begin{itemize}
-\item The limits of using containers
-\item The type of application that suffer the most
-\item The level of oversubscription containers can deal with without impacting considerably the application performance.
-\item The technology is getting mature and performance issues are being solved with each
-new release of the Linux kernel.
+\item The limits of using containers.
+\item The type of application that are affected the most.
+\item The level of oversubscription containers achieved without impacting considerably the application performance.
+\item The technology is getting mature and performance issues are being addressed through the constant evolution of the Linux kernel.
 \end{itemize}
 \end{frame}
 
