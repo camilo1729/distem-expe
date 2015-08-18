@@ -1,4 +1,4 @@
-% Created 2015-08-18 Tue 13:01
+% Created 2015-08-18 Tue 17:54
 \documentclass[presentation]{beamer}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -218,16 +218,18 @@ We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU.
 
 \begin{columns}
 \begin{column}{0.5\textwidth}
-\begin{block}{Max performance gain}
+\begin{block}{Overhead introduced}
 
 
 \begin{itemize}
-\item 3.2 -> 3.16 \textasciitilde{}77\%.
-\item 3.16 -> 4.0 \textasciitilde{}11\%.
+\item 3.2: \alert{1577.78\%}.
+\item 3.16: \alert{22.67\%}.
+\item 4.0: \alert{2.40\%}.
+\item Overhead present in MPI communication.
+\item Since Linux kernel version \alert{3.11}, \alert{TSO} was enabled in \alert{veth}.
 \end{itemize}
 \end{block}
 \end{column}
-
 \begin{column}{0.5\textwidth}
 
 
@@ -244,15 +246,18 @@ We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU.
 \end{columns}
 \end{frame}
 
-\begin{frame}[label=sec-3-4]{Oversubscription}
-64 containers running over: 8,16,32,64 physical machines.
-
+\begin{frame}[label=sec-3-4]{Oversubscription Linux kernel 4.0}
+\begin{itemize}
+\item 64 containers running over: 8,16,32,64 physical machines.
+\item There is a \textit{veth} per MPI processes.
+\end{itemize}
 \begin{columns}
 \begin{column}{0.5\textwidth}
 \begin{block}{Results}
 
 \begin{itemize}
-\item Using Linux kernel 4.0, there is not significant difference between running 1 or 2 container per physical machine.
+\item Top 3 worst performance results: MG, FT, LU.
+\item Maximum overhead (15\%, 67\%).
 \end{itemize}
 \end{block}
 \end{column}
@@ -262,9 +267,9 @@ We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU.
 
 \begin{figure}[!h]
   \center
-  \includegraphics[scale=0.33]{figures/execution_time-tso-40.pdf}
+  \includegraphics[scale=0.30]{figures/execution_time-tso-40.pdf}
   \label{fig:hpc}
-  \caption{LU.B}
+  \caption{FT.B}
 \end{figure}
 \end{column}
 \end{columns}
@@ -297,19 +302,16 @@ All running the equivalent number of MPI processes.
 
 \input{inter-container-table.tex}
 
-%\caption{Profiles of the different NAS benchmarks obtained when executed with 16 MPI processes.
-%         Time is given in milliseconds. For the case \textit{native} 8 physical machines were used}
+\caption{Profile results. Time in \textit{msec}}
 %\label{tab:benchprofiles}
 
 \end{table}
 
 
 \begin{itemize}
-\item Although inter-container communication is faster
-than communication among physical machines, there is an important degradation
-of the CPU performance for applications that are memory bound.
-
-\item Virtual network device does not add an extra cost.
+\item Inter-container communication is the fastest.
+\item Important degradation of the CPU performance for memory bound applications.
+\item LU: 53\%, MG: 53\%, EP: 25\%, CG: 12\%, FT: 0\%, IS: 0\% (overheads regarding native)
 \end{itemize}
 \end{frame}
 
