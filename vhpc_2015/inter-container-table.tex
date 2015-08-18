@@ -1,0 +1,23 @@
+\begin{tabular}{ |c|c|c|c|c|c|c|c|c|c|}
+\hline
+&  & \multicolumn{2}{|c|}{{\bf CG.B}} & \multicolumn{2}{|c|}{{\bf MG.C}} & \multicolumn{2}{|c|}{{\bf LU.B}} & \multicolumn{2}{|c|}{{\bf FT.B}}\\
+\hline
+\multirow{3}{*}{{\bf Native}} & & \% & time& \% & time& \% & time& \% & time\\
+\cline{2-10}
+& cpu& 47 & 3285.85& 70 & 4822.81& 78 & 11221.42& 58 & 4276\\
+& comm& 39 & 2721.28& 15 & 1024.00& 15 & 2106.84& 28 & 2019\\
+& init& 15 & 1044.65& 15 & 1044.55& 7 & 1049.75& 14 & 1044\\
+\hline \hline
+\multirow{3}{*}{{\bf Container}} & & \% & time& \% & time& \% & time& \% & time\\
+\cline{2-10}
+& cpu& 71 & 4831.80& 84 & 6451.96& 83 & 14621.023& 75 & 5415\\
+& comm& 14 & \color{blue}{934.52} & 3 & \color{blue}{206.01} & 11 & \color{blue}{2014.92} & 10 & \color{blue}{722}\\
+& init& 15 & 1052.53& 14 & 1057.48& 6 & 1056.211& 15 & 1052\\
+\hline \hline
+\multirow{3}{*}{{\bf SM}} & & \% & time& \% & time& \% & time& \% & time\\
+\cline{2-10}
+& cpu& 70 & 4714.92& 80 & 6456.2& 81 & 14989.10& 76 & 5440\\
+& comm& 14 & 937.96& 7 & 601.9& 13 & 2349.95& 10 & 725\\
+& init& 16 & 1039.72& 13 & 1038.3& 6 & 1039.65& 14 & 1039\\
+\hline
+\end{tabular}

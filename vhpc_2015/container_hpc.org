@@ -22,6 +22,7 @@
 #+LaTeX_HEADER: \usepackage{fontspec}
 #+LaTeX_HEADER: \usepackage{graphicx}
 #+LaTeX_HEADER: \usepackage{subcaption}
+#+LaTeX_HEADER: \usepackage{color}
 #+latex_header: \newminted{ruby}{fontsize=\scriptsize}
 #+latex_header: \usepackage{./theme/beamerthemeCristian}
 #+latex_header: \usepackage[nocolor]{./theme/beamerAlvinMacros}
@@ -165,15 +166,17 @@
 - Our experimental setup included up to 64 machines.
 
 *** Software
-- Debian Jessie, Linux kernel versions: 3.2, 3.16 and 4.0, TAU, OpenMPI and NPB.
-- We wrote recipes\footnote{https://github.com/camilo1729/distem-recipes} to install the necessary software using
-  Kameleon\cite{Ruiz:2015:RSA:2723872.2723883}.
-- We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU\cite{Shende06thetau}.
+- Debian Jessie, Linux kernel versions: 3.2, 3.16 and 4.0, OpenMPI and NPB.
+  We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU.
+# \cite{Shende06thetau}.
+- We automate the experimentation processes using Distem\footnote{https://distem.gforge.inria.fr}
+  and Kameleon\footnote{https://github.com/camilo1729/distem-recipes}.
+
 
 ** Network setup
 
 - *Veth pair + Linux brigde*
-- Veth pair + OpenVSwitch
+- Veth pair + OpenvSwitch
 - MACVLAN
 - Phys
 
@@ -262,7 +265,7 @@ All running the equivalent number of MPI processes.
   \centering
 \begin{subfigure}[b]{0.42\textwidth}
     \includegraphics[scale=0.25,angle=0]{figures/inter-container-mgC.pdf}
-    \caption{CG Class B}
+    \caption{MG Class B}
   \end{subfigure}
   \begin{subfigure}[b]{0.42\textwidth}
     \includegraphics[scale=0.25,angle=0]{figures/inter-container-isC.pdf}
@@ -272,6 +275,20 @@ All running the equivalent number of MPI processes.
 #+END_LaTeX
 
 ** Inter-container communication
+
+#+BEGIN_LaTeX
+\begin{table}
+  \scriptsize
+
+\input{inter-container-table.tex}
+
+%\caption{Profiles of the different NAS benchmarks obtained when executed with 16 MPI processes.
+%         Time is given in milliseconds. For the case \textit{native} 8 physical machines were used}
+%\label{tab:benchprofiles}
+
+\end{table}
+#+END_LaTeX
+
 
 - Although inter-container communication is faster
   than communication among physical machines, there is an important degradation
@@ -318,8 +335,8 @@ All running the equivalent number of MPI processes.
 - We found a way to alleviate the overhead
   by tweaking parameters of the Linux network stack.
 
-  - TCP minimum retransmission timeout (RTO)
-  - TCP Selective Acknowledgments (SACK)
+  - TCP minimum retransmission timeout (RTO).
+  - TCP Selective Acknowledgments (SACK).
 
 
 * Conclusions

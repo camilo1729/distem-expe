@@ -1,4 +1,4 @@
-% Created 2015-08-17 Mon 21:40
+% Created 2015-08-18 Tue 13:01
 \documentclass[presentation]{beamer}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -22,6 +22,7 @@
 \usepackage{fontspec}
 \usepackage{graphicx}
 \usepackage{subcaption}
+\usepackage{color}
 \newminted{ruby}{fontsize=\scriptsize}
 \usepackage{./theme/beamerthemeCristian}
 \usepackage[nocolor]{./theme/beamerAlvinMacros}
@@ -184,18 +185,21 @@ a 10 Gigabit Ethernet adapter.
 
 \begin{block}{Software}
 \begin{itemize}
-\item Debian Jessie, Linux kernel versions: 3.2, 3.16 and 4.0, TAU, OpenMPI and NPB.
-\item We wrote recipes\footnote{https://github.com/camilo1729/distem-recipes} to install the necessary software using
-Kameleon\cite{Ruiz:2015:RSA:2723872.2723883}.
-\item We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU\cite{Shende06thetau}.
+\item Debian Jessie, Linux kernel versions: 3.2, 3.16 and 4.0, OpenMPI and NPB.
+We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU.
+\end{itemize}
+\begin{itemize}
+\item We automate the experimentation processes using Distem\footnote{https://distem.gforge.inria.fr}
+  and Kameleon\footnote{https://github.com/camilo1729/distem-recipes}.
 \end{itemize}
 \end{block}
 \end{frame}
 
+
 \begin{frame}[label=sec-3-2]{Network setup}
 \begin{itemize}
 \item \alert{Veth pair + Linux brigde}
-\item Veth pair + OpenVSwitch
+\item Veth pair + OpenvSwitch
 \item MACVLAN
 \item Phys
 \end{itemize}
@@ -278,7 +282,7 @@ All running the equivalent number of MPI processes.
   \centering
 \begin{subfigure}[b]{0.42\textwidth}
     \includegraphics[scale=0.25,angle=0]{figures/inter-container-mgC.pdf}
-    \caption{CG Class B}
+    \caption{MG Class B}
   \end{subfigure}
   \begin{subfigure}[b]{0.42\textwidth}
     \includegraphics[scale=0.25,angle=0]{figures/inter-container-isC.pdf}
@@ -288,6 +292,18 @@ All running the equivalent number of MPI processes.
 \end{frame}
 
 \begin{frame}[label=sec-3-6]{Inter-container communication}
+\begin{table}
+  \scriptsize
+
+\input{inter-container-table.tex}
+
+%\caption{Profiles of the different NAS benchmarks obtained when executed with 16 MPI processes.
+%         Time is given in milliseconds. For the case \textit{native} 8 physical machines were used}
+%\label{tab:benchprofiles}
+
+\end{table}
+
+
 \begin{itemize}
 \item Although inter-container communication is faster
 than communication among physical machines, there is an important degradation
@@ -337,8 +353,8 @@ the default container network interconnection.
 by tweaking parameters of the Linux network stack.
 
 \begin{itemize}
-\item TCP minimum retransmission timeout (RTO)
-\item TCP Selective Acknowledgments (SACK)
+\item TCP minimum retransmission timeout (RTO).
+\item TCP Selective Acknowledgments (SACK).
 \end{itemize}
 \end{itemize}
 \end{frame}
