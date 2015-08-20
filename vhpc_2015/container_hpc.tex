@@ -1,4 +1,4 @@
-% Created 2015-08-18 Tue 17:54
+% Created 2015-08-20 Thu 17:42
 \documentclass[presentation]{beamer}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -73,22 +73,9 @@
 \section{Introduction}
 \label{sec-1}
 
-{\setbeamercolor{background canvas}{bg=basicallyblack}
-\usebeamercolor[fg]{inverted text}
-\begin{frame}[label=sec-1-1]{Linux Containers}
-
-
-\par {\usebeamerfont{title} Container based virtualization}\par
-\vspace{1cm} %\hfill
-\end{frame}
-}
-
-
-\begin{frame}[label=sec-1-2]{Containers}
-\begin{itemize}
-\item \alert{Containers} refers generally to \alert{Operating-system-level virtualization},
-where the \alert{kernel} of an operating system allows for multiple isolated \alert{user-space instances}.
-\end{itemize}
+\begin{frame}[label=sec-1-1]{Containers}
+\alert{Containers} refers generally to \alert{Operating-system-level virtualization},
+ where the \alert{kernel} of an operating system allows for multiple isolated \alert{user-space instances}.
 
 \begin{figure}[!h]
   \center
@@ -97,7 +84,7 @@ where the \alert{kernel} of an operating system allows for multiple isolated \al
 \end{figure}
 \end{frame}
 
-\begin{frame}[label=sec-1-3]{Implementations}
+\begin{frame}[label=sec-1-2]{Implementations}
 \begin{itemize}
 \item Chroot
 \item Linux-VServer
@@ -108,10 +95,10 @@ where the \alert{kernel} of an operating system allows for multiple isolated \al
 \end{itemize}
 \end{frame}
 
-\begin{frame}[label=sec-1-4]{\emph{namesapces and cgroups}}
+\begin{frame}[label=sec-1-3]{\emph{namespaces and cgroups}}
 \begin{itemize}
-\item Both features incorporated in Linux kernel since 2006 (Linux 2.6.24).
-\item Several container solutions: LXC, Docker, libcontainer, systemd-nspawn.
+\item Both features incorporated in Linux kernel since 2006 (Linux 2.6.24)
+\item Several container solutions: LXC, Docker, libcontainer, systemd-nspawn
 \end{itemize}
 
 \begin{figure}[!h]
@@ -128,36 +115,55 @@ where the \alert{kernel} of an operating system allows for multiple isolated \al
 \begin{frame}[label=sec-2-1]{Virtualization solutions for HPC}
 \begin{itemize}
 \item Youssef et al\cite{Youseff:2006:EPI:1308175.1308346} evaluated Xen using HPC
-Challenge benchmarks and LLNL ASC Purple benchmarks.
+Challenge benchmarks and LLNL ASC Purple benchmarks
 
 \item Nussbaum et al\cite{nussbaum2009linux} compared Xen and KVM using
-micro-benchmarks and the HPC Challenge benchmarks.
+micro-benchmarks and the HPC Challenge benchmarks
 
 \item Regola et al\cite{regola2010recommendations} focuses on the I/O
-performance of Xen, KVM and OpenVZ.
+performance of Xen, KVM and OpenVZ
 
 \item Public Cloud platforms: Amazon EC2 \cite{5353067} and Microsoft Azure\cite{Tudoran:2012:PEA:2168697.2168701}
-  have been evaluated using Intel MPI benchmarks and scientific applications.
+  have been evaluated using Intel MPI benchmarks and scientific applications
 \end{itemize}
 \end{frame}
 
 \begin{frame}[label=sec-2-2]{Container performance evaluation}
 \begin{itemize}
 \item Matthews et al\cite{matthews2007quantifying} compared the performance of VMWare,
-Xen, Solaris containers and OpenVZ using custom benchmarks.
+Xen, Solaris containers and OpenVZ using custom benchmarks
 \item Felter et al\cite{ibmtrdocker} evaluated the I/O performance of Docker using MySQL,
-Linpack, Stream, RandomAccess, nuttcp, netperf, fio, and Redis.
-\item Walter et al\cite{4482796} compared VMWare Server, Xen and OpenVZ using NetPerf, IOZone, and the NAS Parallel Benchmarks.
+Linpack, Stream, RandomAccess, nuttcp, netperf, fio, and Redis
+\item Walter et al\cite{4482796} compared VMWare Server, Xen and
+OpenVZ using NetPerf, IOZone, and the NAS Parallel Benchmarks
 
 \item Xavier et al\cite{6498558} compared Linux VServer, OpenVZ,
 LXC and Xen using the HPC Challenge benchmarks and the NAS
-Parallel Benchmarks.
+Parallel Benchmarks
+\end{itemize}
+\end{frame}
+
+\begin{frame}[label=sec-2-3]{Benefits of using containers in HPC}
+\begin{itemize}
+\item Containers allow to easily provision a full software stack.
+They bring:
+\begin{itemize}
+\item portability
+\item user customization
+\item reproducibility of experiments
+\end{itemize}
+
+\item Containers provide a lower oversubscription overhead than full vms, enabling:
+\begin{itemize}
+\item a better resource utilization
+\item to be used as a building block for large scale platform emulators
+\end{itemize}
 \end{itemize}
 \end{frame}
 
 {\setbeamercolor{background canvas}{bg=basicallyblack}
 \usebeamercolor[fg]{inverted text}
-\begin{frame}[label=sec-2-3]{In this work, we answer:}
+\begin{frame}[label=sec-2-4]{In this work, we answer:}
 
 
 
@@ -177,24 +183,23 @@ Parallel Benchmarks.
 \begin{frame}[label=sec-3-1]{Experimental setup}
 \begin{block}{Hardware}
 \begin{itemize}
-\item Cluster in Grid'5000 Testbed\cite{grid5000} where each node is equipped with two Intel Xeon E5-2630v3 processors (with 8 cores each), 128 GB of RAM and
-a 10 Gigabit Ethernet adapter.
-\item Our experimental setup included up to 64 machines.
+\item Cluster in Grid'5000 Testbed\cite{grid5000} where each node is equipped
+with two Intel Xeon E5-2630v3 processors (with 8 cores each), 128 GB of RAM and a 10 GbE adapter
+\item Our experimental setup included up to 64 machines
 \end{itemize}
 \end{block}
 
 \begin{block}{Software}
 \begin{itemize}
 \item Debian Jessie, Linux kernel versions: 3.2, 3.16 and 4.0, OpenMPI and NPB.
-We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU.
+We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU
 \end{itemize}
 \begin{itemize}
 \item We automate the experimentation processes using Distem\footnote{https://distem.gforge.inria.fr}
-  and Kameleon\footnote{https://github.com/camilo1729/distem-recipes}.
+  and Kameleon\footnote{https://github.com/camilo1729/distem-recipes}
 \end{itemize}
 \end{block}
 \end{frame}
-
 
 \begin{frame}[label=sec-3-2]{Network setup}
 \begin{itemize}
@@ -212,24 +217,27 @@ We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU.
 \end{figure}
 \end{frame}
 
-
 \begin{frame}[label=sec-3-3]{Linux kernel version}
 32 containers running on: 8,16,32 physical machines.
 
 \begin{columns}
 \begin{column}{0.5\textwidth}
-\begin{block}{Overhead introduced}
-
+\begin{block}{Results}
 
 \begin{itemize}
-\item 3.2: \alert{1577.78\%}.
-\item 3.16: \alert{22.67\%}.
-\item 4.0: \alert{2.40\%}.
-\item Overhead present in MPI communication.
-\item Since Linux kernel version \alert{3.11}, \alert{TSO} was enabled in \alert{veth}.
+\item 2/node
+\begin{itemize}
+\item 3.2: \alert{1577.78\%}
+\item 3.16: \alert{22.67\%}
+\item 4.0: \alert{2.40\%}
+\end{itemize}
+\item Overhead present in MPI communication
+\item Since Linux kernel version \alert{3.11}, \alert{TSO} was enabled in \alert{veth}
 \end{itemize}
 \end{block}
 \end{column}
+
+
 \begin{column}{0.5\textwidth}
 
 
@@ -248,19 +256,21 @@ We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU.
 
 \begin{frame}[label=sec-3-4]{Oversubscription Linux kernel 4.0}
 \begin{itemize}
-\item 64 containers running over: 8,16,32,64 physical machines.
-\item There is a \textit{veth} per MPI processes.
+\item 64 containers running over: 8,16,32,64 physical machines
+\item There is a \textit{veth} per MPI process
 \end{itemize}
 \begin{columns}
 \begin{column}{0.5\textwidth}
 \begin{block}{Results}
 
 \begin{itemize}
-\item Top 3 worst performance results: MG, FT, LU.
-\item Maximum overhead (15\%, 67\%).
+\item Top 3 worst performance results: MG, FT, LU
+\item Maximum overhead (15\%, 67\%)
+\item Container placing plays an important role.
 \end{itemize}
 \end{block}
 \end{column}
+
 
 \begin{column}{0.5\textwidth}
 
@@ -277,8 +287,8 @@ We instrumented the benchmarks: LU, EP, CG, MG, FT, IS using TAU.
 
 \begin{frame}[label=sec-3-5]{Inter-container communication}
 \begin{itemize}
-\item \emph{container} and \emph{SM}: 1 physical node.
-\item \emph{native} : 2, 4, 8 physical nodes.
+\item \emph{container} and \emph{SM}: 1 physical node
+\item \emph{native} : 2, 4, 8 physical nodes
 \end{itemize}
 
 All running the equivalent number of MPI processes.
@@ -309,8 +319,8 @@ All running the equivalent number of MPI processes.
 
 
 \begin{itemize}
-\item Inter-container communication is the fastest.
-\item Important degradation of the CPU performance for memory bound applications.
+\item Inter-container communication is the fastest
+\item Important degradation of the CPU performance for memory bound applications
 \item LU: 53\%, MG: 53\%, EP: 25\%, CG: 12\%, FT: 0\%, IS: 0\% (overheads regarding native)
 \end{itemize}
 \end{frame}
@@ -318,7 +328,7 @@ All running the equivalent number of MPI processes.
 \begin{frame}[label=sec-3-7]{Multinode inter-container communication}
 \begin{itemize}
 \item 16 MPI processes were run per physical machine or container
-\item We used a maximum of 32 physical machines.
+\item We used a maximum of 32 physical machines
 \end{itemize}
 
 \begin{figure}
@@ -336,27 +346,29 @@ All running the equivalent number of MPI processes.
 
 \begin{frame}[label=sec-3-8]{Multinode inter-container communication}
 \begin{itemize}
-\item Benchmarks with low  MPI communication: we observed a maximum overhead of \alert{5.97\%} (with \alert{512 MPI processes}).
-\item Benchmarks with an intensive MPI communication: we observed a higher overhead starting from \alert{30\%} for the benchmark LU.
+\item Benchmarks with low  MPI communication: we observed a maximum overhead of \alert{5.97\%} (with \alert{512 MPI processes})
+\item Benchmarks with an intensive MPI communication: we observed a higher overhead starting from \alert{30\%} for the benchmark LU
 
-\item CG reaches \alert{180\%} of overhead when \alert{128} MPI processes are used.
-This benchmarks sends a high number of MPI messages, around
-a 1000 times more than the first group of benchmarks
-which increase network congestion and leads to TCP timeouts.
+\item A particular behavior is observed for CG benchmark.
+It reaches \alert{180\%} of overhead when \alert{128} MPI processes are used.
+The number of MPI messages sent by this benchmark increases with the number of nodes,
+leading to network congestion and TCP timeouts
 \end{itemize}
 \end{frame}
 
 \begin{frame}[label=sec-3-9]{Multinode inter-container communication}
 \begin{itemize}
-\item It was shown how network bound applications can be severely affected by
+\item Particular communication patterns can be affected by
 the default container network interconnection.
 
+\item This is only observed at certain scale.
+
 \item We found a way to alleviate the overhead
-by tweaking parameters of the Linux network stack.
+by tweaking parameters of the Linux network stack
 
 \begin{itemize}
-\item TCP minimum retransmission timeout (RTO).
-\item TCP Selective Acknowledgments (SACK).
+\item TCP minimum retransmission timeout (RTO)
+\item TCP Selective Acknowledgments (SACK)
 \end{itemize}
 \end{itemize}
 \end{frame}
@@ -366,21 +378,24 @@ by tweaking parameters of the Linux network stack.
 \label{sec-4}
 \begin{frame}[label=sec-4-1]{In this work \ldots{}}
 \begin{itemize}
-\item We study the impact of using containers in the context of HPC research.
+\item We study the impact of using containers in the context of HPC research
 
 \item We evaluate two interesting uses of containers in the context of HPC research: portability of complex software stacks
-and oversubscription.
+and oversubscription
 
-\item We carried out the evaluation under a configuration expected to be found in an HPC context.
+\item We carried out the evaluation under a configuration expected to be found in an HPC context
 \end{itemize}
 \end{frame}
 
 \begin{frame}[label=sec-4-2]{What did we find?}
 \begin{itemize}
-\item The limits of using containers.
-\item The type of application that are affected the most.
-\item The level of oversubscription containers achieved without impacting considerably the application performance.
-\item The technology is getting mature and performance issues are being addressed through the constant evolution of the Linux kernel.
+\item There is important performance degradation provoked by \alert{veth} for Linux kernels < 3.11
+\item Container placing plays in important role under oversubscription
+\item Memory bound applications and application that use \alert{all to all MPI} communication are
+the most affected by oversubscription
+\item Inter-container communication through \alert{veth} has equivalent performance than communication through shared memory using
+OpenMPI
+\item Performance issues can appear only at certain scale (e.g. \alert{180 \%} overhead with \alert{128} nodes for CG benchmark)
 \end{itemize}
 \end{frame}
 
@@ -388,10 +403,10 @@ and oversubscription.
 \begin{frame}[label=sec-4-3]{Future work}
 \begin{itemize}
 \item Measure the impact of using containers on disk I/O and other
-containers features like memory limitation.
+containers features like memory limitation
 
 \item The overhead observed could be diminished by integrating
-more advance network interconnection such as Linux's \emph{macvlan}, SR-IOV or OpenvSwitch\footnote{http://openvswitch.org/}.
+more advance network interconnection such as Linux's \emph{macvlan}, SR-IOV or OpenvSwitch\footnote{http://openvswitch.org/}
 \end{itemize}
 \end{frame}
 
