@@ -171,10 +171,13 @@ KERNEL_VERSIONS.each do |kernel|
   `mkdir -p real_k#{kernel}`
   `mv profile-* real_k#{kernel}/`
 
-  log.info "Starting tests with Containers"
+  log.info "Installing Distem"
 
  # now Install Distem into the nodes
   `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{iplist.first} --env #{jessie_env} -g --debian-version jessie --nodefile #{machinefile}`
+
+  log.info "Starting containers"
+
   if metadata["multi_machine"] then
     `ruby expe_NAS_distem_multi.rb #{iplist.first} #{CORES} #{NUM_CONTAINERS}`
   else

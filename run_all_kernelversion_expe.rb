@@ -12,6 +12,10 @@ nodes.each do |num|
 
   # It does not handle return codes
   `ruby deploy_lxc_expe.rb #{num}`
+  if $?.to_i > 0 then
+    puts "An error was found"
+    exit
+  end
   `mkdir nodes_#{num}`
   `mv real_* nodes_#{num}/`
   `mv distem_* nodes_#{num}/`
