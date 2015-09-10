@@ -29,20 +29,172 @@ benchs: # only NAS benchmarks, specifies the type of benchmark and the class to 
 ## Linux kernel version and oversubscription
 
 The experiments are controlled by two files: `run_all_kernelversion_expe.rb` and `expe_metadata.yaml`.
+First, you have to download them this repository:
 
-First, you have to download the following files from this repository:
+```bash
+	$ wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/expe_metadata.yaml
+	$ wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/run_all_kernelversion_expe.rb
+
+```
+
+Then, we should use the following metadata:
+
+```yaml
+
+log_file: "Distem_expe.log"
+distem_bootstrap_path: "~/Repositories/ruby-cute/examples"
+site: "rennes"
+cluster: "paravance"
+runs: 20
+multi_machine: false
+performance_check: true
+kernel_versions:
+- "4.0"
+container_tests: # For the experiment we deploy up to 8 container per machine
+- 1
+- 2
+- 4
+- 8
+bench_real_test: false
+container_cores: 0
+benchs:
+- :type: lu
+  :class: B
+- :type: cg
+  :class: B
+- :type: ep
+  :class: B
+- :type: ft
+  :class: B
+- :type: is
+  :class: C
+- :type: mg
+  :class: C
+```
+
+Then, execute the ruby script
+
+```bash
+	$ ruby run_all_kernelversion_expe.rb
+
+```
+## Inter-container communication
+
+Download the following scripts:
 
 ```bash
 	$ wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/expe_metadata.yaml
 	$ wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/deploy_lxc_expe.rb
-	$ wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/utils.rb
+
 ```
 
-Then, we execute the following:
+and edit the metadata file like this:
+
+```yaml
+---
+log_file: "Distem_expe.log"
+distem_bootstrap_path: "~/Repositories/ruby-cute/examples"
+site: "rennes"
+cluster: "paravance"
+runs: 20
+multi_machine: false
+performance_check: true
+kernel_versions:
+- "4.0"
+container_tests: # number of containers to be created in each machine
+- 1
+- 2
+- 4
+- 8
+bench_container_test:
+- 2
+- 4
+- 8
+bench_real_test:
+- 2
+- 4
+- 8
+container_cores: 2
+benchs:
+- :type: lu
+  :class: B
+- :type: cg
+  :class: B
+- :type: ep
+  :class: B
+- :type: ft
+  :class: B
+- :type: is
+  :class: C
+- :type: mg
+  :class: C
+
+```
+For the test just one machine will be used.
+Run the script using the follwing parameters:
 
 ```bash
-	$ ruby deploy_real_cluster.rb 8 #Number of nodes
+	$ ruby deploy_lxc_expe.rb 1 2
 
 ```
+
+## Multinode inter-container communication
+
+Download the following scripts:
+
+```bash
+	$ wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/expe_metadata.yaml
+	$ wget https://raw.githubusercontent.com/camilo1729/distem-expe/master/deploy_lxc_expe.rb
+
+```
+and edit the metadata file like this:
+
+
+```yaml
+
+log_file: "Distem_expe.log"
+distem_bootstrap_path: "~/Repositories/ruby-cute/examples"
+site: "rennes"
+cluster: "paravance"
+runs: 20
+multi_machine: true
+performance_check: true
+kernel_versions:
+- "4.0"
+container_tests: # number of containers to be created in each machine
+- 1
+bench_container_test: # depends on the number of machines you reserved
+- 1
+- 2
+- 4
+- 8
+- 16
+- 32
+- 64
+bench_real_test: # depends on the number of machines you reserved
+- 1
+- 2
+- 4
+- 8
+- 16
+- 32
+- 64
+container_cores: 16 # depends on the number of cores you have in the machine
+benchs:
+- :type: lu
+  :class: B
+- :type: cg
+  :class: B
+- :type: ep
+  :class: B
+- :type: ft
+  :class: B
+- :type: is
+  :class: C
+- :type: mg
+  :class: C
+
+```
+
 
 By default it will make a reservation in `paravance` cluster, you can edit it to change the parameter of reservation.
