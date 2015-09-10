@@ -25,6 +25,7 @@ bench_container_test:
 - 128
 bench_real_test: false
 container_cores: 0
+mpi_version: "1.6.5"
 benchs:
 - :type: lu
   :class: B
