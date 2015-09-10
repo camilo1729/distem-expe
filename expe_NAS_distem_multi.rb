@@ -96,4 +96,4 @@ end
 log.info "Containers test finished"
 log.info "Getting the results"
 `mkdir -p distem_temp`
-`rsync -a root@#{CORD}:~/ distem_temp/`
+`rsync -a root@#{CORD}:~/profile* distem_temp/`
