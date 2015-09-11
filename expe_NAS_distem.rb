@@ -12,10 +12,11 @@ CORES = ARGV[1].to_i
 HOME = ENV['HOME']
 G5K_USER = ENV['USER']
 
-LXC_IMAGE_PATH = "#{HOME}/jessie-tau-lxc.tar.gz"
+
 
 metadata = YAML.load(File.read("expe_metadata.yaml"))
 DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
+LXC_IMAGE_PATH = metadata["lxc_image_path"]
 RUNS = metadata["runs"]
 VNODES_TESTS = metadata["container_tests"]
 
