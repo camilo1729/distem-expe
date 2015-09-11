@@ -79,7 +79,6 @@ VNODES_TESTS.each do |vnodes|
     log.info ssh.exec!("ruby create_machinefile.rb #{CORES}")
     log.info "Verifying connectivity"
     log.debug ssh.exec!("for i in $(cat machine_file); do ssh $i hostname; done")
-    log.debug ssh.exec!("for i in $(cat machine_file); do ssh $i ldconfig; done")
     lines = ssh.exec!("wc -l machine_file")
     num_nodes = lines.split(" ").first
     log.info ssh.exec!("ruby deploy_NAS_on_cluster.rb #{num_nodes} #{RUNS}")

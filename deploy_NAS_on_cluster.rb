@@ -38,6 +38,13 @@ Net::SCP.start(nodes.first,'root') do |scp|
 end
 
 
+# enabling MPI libraries. This is only necessary for compiled MPI
+log.info "Enabling MPI libraries"
+Cute::TakTuk.start(nodes, :user => 'root') do |tak|
+  tak.exec!("ldconfig")
+end
+
+
 # Compiling on the first machine
 TAU_MAKE = "/usr/local/tau-install/x86_64/lib/Makefile.tau-mpi-pdt"
 
