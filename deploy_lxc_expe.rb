@@ -174,7 +174,7 @@ KERNEL_VERSIONS.each do |kernel|
   log.info "Installing Distem"
 
  # now Install Distem into the nodes
-  `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{iplist.first} --env #{jessie_env} -g --debian-version jessie --nodefile #{machinefile}`
+  `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{iplist.first} --env #{jessie_env} -g --debian-version jessie -f #{machinefile}`
 
   log.info "Starting containers"
 
