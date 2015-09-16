@@ -35,3 +35,25 @@ class MultiIO
     @targets.each(&:close)
   end
 end
+
+def install_kernel(machines)
+  Net::SSH::Multi.start do |session|
+    # downloading debian package
+    machines.each{ |node| session.use("root@#{node}")}
+    # asking the user for debian package
+    puts "Enter the name of the debian package to download:"
+    debian_package = gets.chomp
+    session.exec! "wget http://public.rennes.grid5000.fr/~cruizsanabria/#{debian_package}"
+    session.exec! "dpkg -i #{debian_package}"
+    package_name = debian_package.split("_")[0]
+    vmlinuz = session.exec! "dpkg -L #{package_name} | grep vmlinuz | cut -d'/' -f3"
+    version = vmlinuz.values.first[:stdout].split("-")[1]
+    # changing symbolic link for booting with other kernel
+
+    session.exec! "rm /boot/vmlinuz"
+    session.exec! "rm /boot/initrd"
+    session.exec! "cd /boot/ && ln -s vmlinuz-#{version} vmlinuz"
+    session.exec! "cd /boot/ && ln -s initrd.img-#{version} initrd"
+
+  end
+end
