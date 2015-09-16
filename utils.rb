@@ -42,7 +42,8 @@ def install_kernel(machines)
     machines.each{ |node| session.use("root@#{node}")}
     # asking the user for debian package
     puts "Enter the name of the debian package to download:"
-    debian_package = gets.chomp
+    debian_package = STDIN.gets.chomp
+    puts "Downloading package: #{debian_package}"
     session.exec! "wget http://public.rennes.grid5000.fr/~cruizsanabria/#{debian_package}"
     session.exec! "dpkg -i #{debian_package}"
     package_name = debian_package.split("_")[0]
