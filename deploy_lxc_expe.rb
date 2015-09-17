@@ -113,10 +113,10 @@ KERNEL_VERSIONS.each do |kernel|
     exit
   end
 
-  iplist = nodelist.map{|node| Resolv.getaddress node}
+#  iplist = nodelist.map{|node| Resolv.getaddress node}
 
   File.open("machine_file",'w+') do |f|
-    iplist.each{ |node| f.puts node }
+    nodelist.each{ |node| f.puts node }
   end
 
   machinefile = File.absolute_path("machine_file")
@@ -175,14 +175,14 @@ KERNEL_VERSIONS.each do |kernel|
 
   local_repository = "http://public.nancy.grid5000.fr/~cruizsanabria/distem.git"
  # now Install Distem into the nodes
-  `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{iplist.first} --env #{jessie_env} -g --debian-version jessie -f #{machinefile} --git-url #{local_repository}`
+  `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{nodelist.first} --env #{jessie_env} -g --debian-version jessie -f #{machinefile} --git-url #{local_repository}`
 
   log.info "Starting containers"
 
   if metadata["multi_machine"] then
-    `ruby expe_NAS_distem_multi.rb #{iplist.first} #{CORES} #{NUM_CONTAINERS}`
+    `ruby expe_NAS_distem_multi.rb #{nodelist.first} #{CORES} #{NUM_CONTAINERS}`
   else
-    `ruby expe_NAS_distem.rb #{iplist.first} #{CORES}`
+    `ruby expe_NAS_distem.rb #{nodelist.first} #{CORES}`
   end
   `mv distem_temp/ distem_k#{kernel}/`
 end
