@@ -27,7 +27,7 @@ num_procs = nodes.length
 nodes.uniq!
 
 log.info "Downloading NAS if does not exist"
-`wget #{SOURCE_NAS} -O /tmp/NAS.tar` unless File.exist?("/tmp/NAS.tar")
+`wget -N #{SOURCE_NAS} -O /tmp/NAS.tar`
 
 
 # Transferring code to the first machine
