@@ -48,7 +48,7 @@ def install_kernel(machines)
     session.exec! "dpkg -i #{debian_package}"
     package_name = debian_package.split("_")[0]
     vmlinuz = session.exec! "dpkg -L #{package_name} | grep vmlinuz | cut -d'/' -f3"
-    version = vmlinuz.values.first[:stdout].split("-")[1]
+    version = vmlinuz.values.first[:stdout].split("vmlinuz-")[1]
     # changing symbolic link for booting with other kernel
 
     session.exec! "rm /boot/vmlinuz"
