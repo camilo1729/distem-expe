@@ -2,6 +2,7 @@ require 'resolv'
 require 'net/scp'
 require 'cute'
 require 'socket'
+
 # useful methods
 load 'utils.rb'
 
@@ -45,9 +46,9 @@ reserv_param = {:site => SITE,
                 :nodes => NB,
                 :cluster => CLUSTER,
                 :wait => false,
-                :walltime => "02:00:00",
+                :walltime => "9:00:00",
                 :type => :deploy, :name => job_name,
-                :subnets => [18,1]}#,:vlan => :routed)
+                :subnets => [18,1]}#:queue => "testing"}#,:vlan => :routed)
 
 # In case we have already a reservation
 old_jobs = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == job_name}
@@ -78,13 +79,18 @@ nodelist = job['assigned_nodes'].uniq
 nodelist = nodelist[0..(NB-1)] # choosing the require amount of nodes
 log.info "Running with #{NB} nodes"
 
-KERNEL_VERSIONS.each do |kernel|
 
-  log.info "Testing with kernel version #{kernel}"
+test_num = 19
+loop do
 
-  jessie_env = "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml"
+  log.info "deploying based environment"
+
+
+  jessie_env = "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-kernel-git.yaml"
   g5k.deploy(job,:nodes => nodelist, :env => jessie_env)
   g5k.wait_for_deploy(job)
+
+
 
   badnodes = check_deployment(job["deploy"].last)
   # redeploying for bad nodes
@@ -95,17 +101,6 @@ KERNEL_VERSIONS.each do |kernel|
     badnodes = check_deployment(job["deploy"].last)
   end
 
-  if metadata["performance_check"] then
-    badnodes = check_cpu_performance(nodelist,18)
-
-    while not badnodes.empty? do
-      log.info "Redeploying nodes because of performance #{badnodes}"
-      g5k.deploy(job,:nodes => badnodes, :env => "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml")
-      g5k.wait_for_deploy(job)
-      badnodes = check_cpu_performance(nodelist,18)
-    end
-  end
-
   log.info "Generating machine file"
 
   if nodelist.length > NB then
@@ -113,13 +108,31 @@ KERNEL_VERSIONS.each do |kernel|
     exit
   end
 
-#  iplist = nodelist.map{|node| Resolv.getaddress node}
+  iplist = nodelist.map{|node| Resolv.getaddress node}
 
   File.open("machine_file",'w+') do |f|
     nodelist.each{ |node| f.puts node }
   end
 
   machinefile = File.absolute_path("machine_file")
+  log.info "Installing new kernel"
+  install_kernel(nodelist)
+  log.info "rebooting nodes into the new kernel"
+  `kareboot3 -f #{machinefile} -l hard`
+
+
+
+  if metadata["performance_check"] then
+    badnodes = check_cpu_performance(nodelist,18)
+
+    while not badnodes.empty? do
+      log.info "Redeploying nodes because of performance #{badnodes}"
+      g5k.deploy(job,:nodes => badnodes, :env => jessie_env)
+      g5k.wait_for_deploy(job)
+      badnodes = check_cpu_performance(nodelist,18)
+    end
+  end
+
 
   key_dir = Dir.mktmpdir("keys")
   system "ssh-keygen -P \'\' -f #{key_dir}/keys"
@@ -150,54 +163,64 @@ KERNEL_VERSIONS.each do |kernel|
     log.info session.exec! "uname -a"
   end
 
-  log.info "Bench real multi activated" if BENCH_REAL_TEST
+  # log.info "Bench real multi activated" if BENCH_REAL_TEST
 
-  num_machines = BENCH_REAL_TEST ? BENCH_REAL_TEST : [nodelist.length]
-  cores = CORES > 1 ? CORES : 1
+  # num_machines = BENCH_REAL_TEST ? BENCH_REAL_TEST : [nodelist.length]
+  # cores = CORES > 1 ? CORES : 1
 
-  log.info "Experiments will run with #{num_machines} machines"
+  # log.info "Experiments will run with #{num_machines} machines"
 
-  num_machines.each do |num|
+  # num_machines.each do |num|
 
-    File.open("machine_file",'w+') do |f|
-      nodelist[0..(num-1)].each do |node|
-        cores.times{f.puts node }
-      end
-    end
+  #   File.open("machine_file",'w+') do |f|
+  #     nodelist[0..(num-1)].each do |node|
+  #       cores.times{f.puts node }
+  #     end
+  #   end
 
-    `ruby deploy_NAS_on_cluster.rb #{num*cores} #{RUNS}`
-  end
+  #   `ruby deploy_NAS_on_cluster.rb #{num*cores} #{RUNS}`
+  # end
 
-  `mkdir -p real_k#{kernel}`
-  `mv profile-* real_k#{kernel}/`
+  # `mkdir -p real#{test_num}`
+  # `mv profile-* real#{test_num}`
 
-  # deploying netns
+  log.info "Deploying NETNS"
 
   net = g5k.get_subnets(job)
   ips = net[1].map{ |ip| ip}
   ips.pop
   nodelist.each do |node|
 
-    Net::SSH.start(node, "root") do |ssh|
-      log.info "Setting up bridge in node: #{node}"
-      ssh.exec! "DEBIAN_FRONTEND=noninteractive apt-get install -q -y bridge-utils"
-      ssh.exec! "brctl addbr br0"
+    log.info "Creating scripts"
+
+    File.open("script_#{node}",'w+') do |f|
+      f.puts "DEBIAN_FRONTEND=noninteractive apt-get install -q -y bridge-utils"
+      f.puts "brctl addbr br0"
       ip_node = IPSocket.getaddress(node)
-      ssh.exec! "ip addr add dev br0 #{ip_node}"
-      ssh.exec! "ip link set dev br0 up"
-      ssh.exec! "brctl addif br0 eth0"
-      ssh.exec! "ifconfig eth0 0.0.0.0 up"
+      f.puts "ip addr add dev br0 #{ip_node}/20"
+      f.puts "ip link set dev br0 up"
+      f.puts "brctl addif br0 eth0"
+      f.puts "ifconfig eth0 0.0.0.0 up"
 
       ip_reserv = ips.pop
-      ssh.exec! "ifconfig br0:0 #{ip_reserv.to_string}"
-      ssh.exec! "ip route add #{net.to_string} via #{ip_reserv.address} dev br0"
+      f.puts "ifconfig br0:0 #{ip_reserv.to_string}"
+      f.puts "ip route add #{net[1].to_string} via #{ip_reserv.address} dev br0"
+    end
+
+    Net::SCP.start(node, "root") do |scp|
+      log.info "Transfering script to  #{node}"
+      scp.upload "script_#{node}","script_#{node}"
+    end
+
+    Net::SSH.start(node, "root") do |ssh|
+      log.info "Setting up bridge in node: #{node}"
+      ssh.exec! "chmod +x script_#{node}"
+      ssh.exec! "bash script_#{node}"
 
     end
 
   end
-
-
-
+  test_num+=1
 end
 
 log.info "All experiments finished"
