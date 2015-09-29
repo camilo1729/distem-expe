@@ -205,6 +205,17 @@ loop do
       ip_reserv = ips.pop
       f.puts "ifconfig br0:0 #{ip_reserv.to_string}"
       f.puts "ip route add #{net[1].to_string} via #{ip_reserv.address} dev br0"
+
+      f.puts "ip link add name ext1 type veth peer name int0"
+      f.puts "ip link set ext1 up"
+      f.puts "brctl addif br0 ext1"
+
+      ip_vnode = ips.shift
+      f.puts "ip netns add vnode"
+      f.puts "ip link set dev int0 netns vnode"
+      f.puts "ip netns exec vnode ip addr add  #{ip_vnode.to_string} dev int0"
+      f.puts "ip netns exec vnode ip link set dev int0 up"
+      f.puts "ip netns exec vnode /usr/sbin/sshd -p 22"
     end
 
     Net::SCP.start(node, "root") do |scp|
