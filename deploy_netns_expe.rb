@@ -189,6 +189,7 @@ loop do
   net = g5k.get_subnets(job)
   ips = net[1].map{ |ip| ip}
   ips.pop
+  ips.shift
   vnode_ips = []
   nodelist.each do |node|
 
