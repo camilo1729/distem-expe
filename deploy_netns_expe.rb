@@ -80,7 +80,7 @@ nodelist = nodelist[0..(NB-1)] # choosing the require amount of nodes
 log.info "Running with #{NB} nodes"
 
 
-test_num = 19
+test_num = 1
 loop do
 
   log.info "deploying based environment"
@@ -163,32 +163,33 @@ loop do
     log.info session.exec! "uname -a"
   end
 
-  # log.info "Bench real multi activated" if BENCH_REAL_TEST
+  log.info "Bench real multi activated" if BENCH_REAL_TEST
 
-  # num_machines = BENCH_REAL_TEST ? BENCH_REAL_TEST : [nodelist.length]
-  # cores = CORES > 1 ? CORES : 1
+  num_machines = BENCH_REAL_TEST ? BENCH_REAL_TEST : [nodelist.length]
+  cores = CORES > 1 ? CORES : 1
 
-  # log.info "Experiments will run with #{num_machines} machines"
+  log.info "Experiments will run with #{num_machines} machines"
 
-  # num_machines.each do |num|
+  num_machines.each do |num|
 
-  #   File.open("machine_file",'w+') do |f|
-  #     nodelist[0..(num-1)].each do |node|
-  #       cores.times{f.puts node }
-  #     end
-  #   end
+    File.open("machine_file",'w+') do |f|
+      nodelist[0..(num-1)].each do |node|
+        cores.times{f.puts node }
+      end
+    end
 
-  #   `ruby deploy_NAS_on_cluster.rb #{num*cores} #{RUNS}`
-  # end
+    `ruby deploy_NAS_on_cluster.rb #{num*cores} #{RUNS}`
+  end
 
-  # `mkdir -p real#{test_num}`
-  # `mv profile-* real#{test_num}`
+  `mkdir -p real#{test_num}`
+  `mv profile-* real#{test_num}`
 
   log.info "Deploying NETNS"
 
   net = g5k.get_subnets(job)
   ips = net[1].map{ |ip| ip}
   ips.pop
+  vnode_ips = []
   nodelist.each do |node|
 
     log.info "Creating scripts"
@@ -211,6 +212,7 @@ loop do
       f.puts "brctl addif br0 ext1"
 
       ip_vnode = ips.shift
+      vnode_ips.push(ip_vnode.address)
       f.puts "ip netns add vnode"
       f.puts "ip link set dev int0 netns vnode"
       f.puts "ip netns exec vnode ip addr add  #{ip_vnode.to_string} dev int0"
@@ -231,6 +233,31 @@ loop do
     end
 
   end
+
+  log.info "Running NAS inside NETNS"
+  log.info "Creating new machine files for VNODES"
+  File.open("vnode_ips",'w+') do |f|
+    vnode_ips.each{ |ip|
+      cores.times{f.puts ip}
+      }
+  end
+
+  Net::SCP.start(nodelist.first, "root") do |scp|
+      log.info "Transferring vnodes machine file  #{nodelist.first}"
+      scp.upload "vnode_ips", "machine_file"
+      scp.upload "deploy_NAS_on_cluster.rb", "deploy_NAS_on_cluster.rb"
+      scp.upload "expe_metadata.yaml","expe_metadata.yaml"
+  end
+
+  Net::SSH.start(nodelist.first, "root") do |ssh|
+      log.info "Executing NAS in: #{nodelist.first}"
+      num_machines.each do |num|
+        ssh.exec! "ruby deploy_NAS_on_cluster.rb #{num*cores} #{RUNS}"
+      end
+  end
+
+  `mkdir -p distem#{test_num}`
+  `rsync -av root@#{nodelist.first}:~/profile-* distem#{test_num}/`
   test_num+=1
 end
 
