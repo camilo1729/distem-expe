@@ -197,6 +197,9 @@ loop do
 
     File.open("script_#{node}",'w+') do |f|
       f.puts "DEBIAN_FRONTEND=noninteractive apt-get install -q -y bridge-utils"
+      f.puts "export http_proxy=http://proxy:3128"
+      f.puts "export https_proxy=http://proxy:3128"
+      f.puts "gem install ruby-cute"
       f.puts "brctl addbr br0"
       ip_node = IPSocket.getaddress(node)
       f.puts "ip addr add dev br0 #{ip_node}/20"
@@ -218,6 +221,8 @@ loop do
       f.puts "ip link set dev int0 netns vnode"
       f.puts "ip netns exec vnode ip addr add  #{ip_vnode.to_string} dev int0"
       f.puts "ip netns exec vnode ip link set dev int0 up"
+      # loopback interface necessary for MPI
+      f.puts "ip netns exec vnode ip link set dev lo up"
       f.puts "ip netns exec vnode /usr/sbin/sshd -p 22"
     end
 
