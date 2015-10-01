@@ -75,13 +75,27 @@ Net::SCP.start(nodes.first,'root') do |scp|
 end
 
 log.info "Transferring to all nodes"
-Cute::TakTuk.start(nodes, :user => 'root') do |tak|
-  binaries.each do |binary|
-    tak.put(binary,binary)
+nodes.each do |node|
+  Net::SCP.start(node,'root') do |scp|
+    binaries.each do |binary|
+      log.info "sending binary to #{node}"
+      log.debug scp.upload binary, binary
+    end
   end
-  log.info "Cleaning previous state"
-  tak.exec!("rm profile*")
 end
+
+
+
+# I get rid of taktuk because It has a strange behavior when using plain netns
+# as interconnection
+
+# Cute::TakTuk.start(nodes, :user => 'root') do |tak|
+#   binaries.each do |binary|
+#     tak.put(binary,binary)
+#   end
+#   log.info "Cleaning previous state"
+#   tak.exec!("rm profile*")
+# end
 
 log.info "Executing #{RUNS} runs per type of bench"
 
