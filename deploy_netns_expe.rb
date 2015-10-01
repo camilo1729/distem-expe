@@ -208,9 +208,12 @@ loop do
       f.puts "ifconfig eth0 0.0.0.0 up"
 
       ip_reserv = ips.pop
-      f.puts "ifconfig br0:0 #{ip_reserv.to_string}"
-      f.puts "ip route add #{net[1].to_string} via #{ip_reserv.address} dev br0"
+      f.puts "ifconfig br0:1 #{ip_reserv.to_string} netmask #{net[1].netmask}"
+      # it is not necessary because it is added automatically by the command ifconfig
+      #f.puts "ip route add #{net[1].to_string} via #{ip_reserv.address} dev br0"
+      # I have to add default route
 
+      f.puts "ip route add default via 172.16.111.254"
       f.puts "ip link add name ext1 type veth peer name int0"
       f.puts "ip link set ext1 up"
       f.puts "brctl addif br0 ext1"
