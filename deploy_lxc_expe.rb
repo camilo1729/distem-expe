@@ -47,7 +47,7 @@ reserv_param = {:site => SITE,
                 :wait => false,
                 :walltime => "02:00:00",
                 :type => :deploy, :name => job_name,
-                :subnets => [18,1],:queue => "testing"}#,:vlan => :routed)
+                :subnets => [18,1]}#,:vlan => :routed)
 
 # In case we have already a reservation
 old_jobs = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == job_name}
@@ -100,7 +100,7 @@ KERNEL_VERSIONS.each do |kernel|
 
     while not badnodes.empty? do
       log.info "Redeploying nodes because of performance #{badnodes}"
-      g5k.deploy(job,:nodes => badnodes, :env => "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml")
+      g5k.deploy(job,:nodes => badnodes, :env => jessie_env)
       g5k.wait_for_deploy(job)
       badnodes = check_cpu_performance(nodelist,18)
     end
@@ -175,7 +175,7 @@ KERNEL_VERSIONS.each do |kernel|
 
   local_repository = "http://public.nancy.grid5000.fr/~cruizsanabria/distem.git"
  # now Install Distem into the nodes
-  `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{nodelist.first} --env #{jessie_env} -g --debian-version jessie -f #{machinefile} --git-url #{local_repository}`
+  `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{nodelist.first} -g --debian-version jessie -f #{machinefile} --git-url #{local_repository}`
 
   log.info "Starting containers"
 
