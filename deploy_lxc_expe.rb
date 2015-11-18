@@ -6,10 +6,8 @@ require 'cute'
 load 'utils.rb'
 
 NB = ARGV[0].to_i
-job_name = ARGV[2]
 
-
-job_name = "distem" if job_name.nil?
+NO_DEPLOY = ARGV[1].to_s
 
 if NB.nil? then
 
@@ -19,13 +17,14 @@ end
 
 ## getting experiment metadata
 metadata = YAML.load(File.read("expe_metadata.yaml"))
+job_name = metadata["job_name"]
 DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
 RUNS = metadata["runs"]
 KERNEL_VERSIONS = metadata["kernel_versions"]
 CORES = metadata["container_cores"].to_i
 SITE = metadata["site"]
 CLUSTER = metadata["cluster"]
-NUM_CONTAINERS = ARGV[1].to_i if metadata["multi_machine"] # it controls if we want to iterate with the benchmark
+# NUM_CONTAINERS = ARGV[1].to_i if metadata["multi_machine"] # it controls if we want to iterate with the benchmark
 BENCH_REAL_TEST = metadata["bench_real_test"]
 
 log_file = File.open(metadata["log_file"], "a")
@@ -36,7 +35,6 @@ log.level = Logger::INFO
 #log.level = Logger::DEBUG
 
 # parameter subnets makes the reservation  compatible with an installation of distem
-
 g5k = Cute::G5K::API.new()
 
 #Reassigning the logger for capturing Grid'5000 API output
@@ -86,16 +84,19 @@ KERNEL_VERSIONS.each do |kernel|
   log.info "Testing with kernel version #{kernel}"
 
   jessie_env = "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml"
-  g5k.deploy(job,:nodes => nodelist, :env => jessie_env)
-  g5k.wait_for_deploy(job)
 
-  badnodes = check_deployment(job["deploy"].last)
-  # redeploying for bad nodes
-  while not badnodes.empty? do
-    log.info "Redeploying nodes #{badnodes}"
-    g5k.deploy(job,:nodes => badnodes, :env => jessie_env)
+  if NO_DEPLOY.empty?
+    g5k.deploy(job,:nodes => nodelist, :env => jessie_env)
     g5k.wait_for_deploy(job)
+
     badnodes = check_deployment(job["deploy"].last)
+    # redeploying for bad nodes
+    while not badnodes.empty? do
+      log.info "Redeploying nodes #{badnodes}"
+      g5k.deploy(job,:nodes => badnodes, :env => jessie_env)
+      g5k.wait_for_deploy(job)
+      badnodes = check_deployment(job["deploy"].last)
+    end
   end
 
   if metadata["performance_check"] then
