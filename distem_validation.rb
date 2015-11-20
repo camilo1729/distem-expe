@@ -33,10 +33,7 @@ g5k.logger = log
 
 old_jobs = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == job_name}
 
-raise "You need a job running"
-
-job = old_jobs.empty? ? g5k.reserve(reserv_param) : old_jobs.first
-
+raise "You need a job running" if old_jobs.empty?
 
 log.info "Downloading necessary scripts"
 
