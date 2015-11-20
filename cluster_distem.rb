@@ -81,7 +81,7 @@ Distem.client do |cl|
     end
 
     res = cl.vnodes_create(pnode_list,{
-                                    'host' => pnode["address"],
+                                    'host' => pnode[0],
                                     'vfilesystem' =>{'image' => options[:image],'shared' => true},
                                     'vifaces' => [{'name' => 'if0', 'vnetwork' => vnet['name']}]
                                       }, ssh_keys)
