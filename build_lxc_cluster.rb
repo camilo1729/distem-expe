@@ -14,7 +14,6 @@ HOME = ENV['HOME']
 G5K_USER = ENV['USER']
 
 
-
 metadata = YAML.load(File.read("expe_metadata.yaml"))
 DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
 LXC_IMAGE_PATH = metadata["lxc_image_path"]
@@ -51,7 +50,6 @@ net = g5k.get_subnets(job)
 
 log.info "Downloading necessary files"
 expe_files = ["utils.rb","create_machinefile.rb","cluster_distem.rb","delete_cluster.rb"]
-
 
 
 Net::SCP.start(CORD, "root") do |scp|

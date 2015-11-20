@@ -1,6 +1,5 @@
 require 'cute'
 
-
 puts "filling the ARP tables"
 
 nodes = []

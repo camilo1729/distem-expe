@@ -95,8 +95,6 @@ Distem.client do |cl|
     }
   end
 
-
-
   puts 'Starting containers'
 
   cl.vnodes_start(nodelist)
