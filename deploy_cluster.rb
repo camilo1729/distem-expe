@@ -51,7 +51,7 @@ g5k.logger = log
 
 # always take nodes on the same switch
 reserv_param = {:site => SITE,
-                :switches => 1+ NB/36,
+                :switches => 1+ options[:nodes]/36,
                 :nodes => options[:nodes],
                 :cluster => CLUSTER,
                 :wait => false,
@@ -82,7 +82,7 @@ log.info "Deploying environment: #{options[:nodes]}"
 
 g5k.deploy(job,:nodes => nodelist, :env => options[:env])
 g5k.wait_for_deploy(job)
-badnodes = check_deployment(job["deploy"].last)
+badnodes = g5k.check_deployment(job["deploy"].last)
 
 # redeploying for bad nodes
 while not badnodes.empty? do
