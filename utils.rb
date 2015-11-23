@@ -1,7 +1,3 @@
-def check_deployment(deploy_info)
-  # It returns an array of machines that didnt deploy
-  deploy_info["result"].select{ |p,v|  v["state"] == "KO"}.keys
-end
 
 def check_cpu_performance(machines,ref_value)
   badnodes = {}
