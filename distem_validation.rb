@@ -5,6 +5,11 @@ require 'cute'
 # useful methods
 load 'utils.rb'
 
+NB = ARGV[0].to_i
+
+raise "You must specify the number of nodes" if NB.nil?
+
+WALLTIME = ARGV[1].to_s || "2:00:00"
 
 ## getting experiment metadata
 metadata = YAML.load(File.read("expe_metadata.yaml"))
@@ -13,8 +18,7 @@ DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
 RUNS = metadata["runs"]
 KERNEL_VERSIONS = metadata["kernel_versions"]
 CORES = metadata["container_cores"].to_i
-SITE = metadata["site"]
-CLUSTER = metadata["cluster"]
+
 # NUM_CONTAINERS = ARGV[1].to_i if metadata["multi_machine"] # it controls if we want to iterate with the benchmark
 BENCH_REAL_TEST = metadata["bench_real_test"]
 
@@ -34,6 +38,8 @@ g5k.logger = log
 old_jobs = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == job_name}
 
 raise "You need a job running" if old_jobs.empty?
+
+job = old_jobs.first
 
 log.info "Downloading necessary scripts"
 
@@ -85,14 +91,47 @@ KERNEL_VERSIONS.each do |kernel|
   # now Install Distem into the nodes
   `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{nodelist.first} -g --debian-version jessie -f #{machinefile} --git-url #{local_repository}`
 
-  log.info "Starting containers"
+  log.info "Deploying container cluster"
 
-  if metadata["multi_machine"] then
-    `ruby expe_NAS_distem_multi.rb #{nodelist.first} #{CORES} #{NUM_CONTAINERS}`
-  else
-    `ruby expe_NAS_distem.rb #{nodelist.first} #{CORES}`
+  `ruby build_lxc_cluster #{nodelist.first} #{CORES}`
+
+  log.info "Downloading necessary files"
+  expe_files = ["deploy_NAS_on_cluster.rb"]
+
+  Net::SCP.start(CORD, "root") do |scp|
+
+    expe_files.each do |file|
+      `wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/#{file}`
+      scp.upload file, file
+    end
+    scp.upload "expe_metadata.yaml", "expe_metadata.yaml"
   end
+
+
+  Net::SSH.start(CORD, 'root') do |ssh|
+    log.info "printing kernel version"
+    log.info ssh.exec!("uname -a")
+    log.info "Verifying connectivity"
+    log.debug ssh.exec!("for i in $(cat machine_file); do ssh $i hostname; done")
+    lines = ssh.exec!("wc -l machine_file")
+    num_nodes = lines.split(" ").first
+    log.info ssh.exec!("ruby deploy_NAS_on_cluster.rb #{num_nodes} #{RUNS}")
+  end
+
+  log.info "Containers test finished"
+  log.info "Getting the results"
+  `mkdir -p distem_temp`
+  `rsync -a root@#{CORD}:~/profile* distem_temp/`
   `mv distem_temp/ distem_k#{kernel}/`
+
+  # This is now incompatible after code factorization
+  # to FIX
+  # if metadata["multi_machine"] then
+  #   `ruby expe_NAS_distem_multi.rb #{nodelist.first} #{CORES} #{NUM_CONTAINERS}`
+  # else
+  #   `ruby expe_NAS_distem.rb #{nodelist.first} #{CORES}`
+  # end
+
 end
 
 log.info "All experiments finished"
