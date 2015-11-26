@@ -115,7 +115,6 @@ File.open("machine_file",'w+') do |f|
   nodelist.each{ |node| f.puts node }
 end
 
-machinefile = File.absolute_path("machine_file")
 
 key_dir = Dir.mktmpdir("keys")
 system "ssh-keygen -P \'\' -f #{key_dir}/keys"

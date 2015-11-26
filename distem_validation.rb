@@ -88,8 +88,11 @@ KERNEL_VERSIONS.each do |kernel|
   log.info "Installing Distem"
 
   local_repository = "http://public.nancy.grid5000.fr/~cruizsanabria/distem.git"
+
+  coordinator = nodelist.first
+
   # now Install Distem into the nodes
-  `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{nodelist.first} -g --debian-version jessie -f #{machinefile} --git-url #{local_repository}`
+  `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{coordinator} -g --debian-version jessie -f machine_file --git-url #{local_repository}`
 
   log.info "Deploying container cluster"
 
@@ -98,7 +101,7 @@ KERNEL_VERSIONS.each do |kernel|
   log.info "Downloading necessary files"
   expe_files = ["deploy_NAS_on_cluster.rb"]
 
-  Net::SCP.start(CORD, "root") do |scp|
+  Net::SCP.start(coordinator, "root") do |scp|
 
     expe_files.each do |file|
       `wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/#{file}`
@@ -108,7 +111,7 @@ KERNEL_VERSIONS.each do |kernel|
   end
 
 
-  Net::SSH.start(CORD, 'root') do |ssh|
+  Net::SSH.start(coordinator, 'root') do |ssh|
     log.info "printing kernel version"
     log.info ssh.exec!("uname -a")
     log.info "Verifying connectivity"
@@ -121,7 +124,7 @@ KERNEL_VERSIONS.each do |kernel|
   log.info "Containers test finished"
   log.info "Getting the results"
   `mkdir -p distem_temp`
-  `rsync -a root@#{CORD}:~/profile* distem_temp/`
+  `rsync -a root@#{coordinator}:~/profile* distem_temp/`
   `mv distem_temp/ distem_k#{kernel}/`
 
   # This is now incompatible after code factorization
