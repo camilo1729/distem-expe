@@ -7,7 +7,9 @@ SOURCE_NAS =  "http://public.rennes.grid5000.fr/~cruizsanabria/NPB3.3.tar"
 
 ## getting experiment metadata
 metadata = YAML.load(File.read("expe_metadata.yaml"))
-DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
+
+NUM_PROCS = ARGV[0]
+RUNS = ARGV[1].to_i
 
 log_file = File.open(metadata["log_file"], "a")
 log = Logger.new MultiIO.new(STDOUT, log_file)
@@ -23,8 +25,9 @@ end
 f.close
 
 # making nodes unique
-num_procs = nodes.length
 nodes.uniq!
+
+nper_node = NUM_PROCS/nodes.length
 
 log.info "Downloading NAS if does not exist"
 `wget #{SOURCE_NAS} -O /tmp/NAS.tar`
@@ -50,9 +53,6 @@ TAU_MAKE = "/usr/local/tau-install/x86_64/lib/Makefile.tau-mpi-pdt"
 
 # Reading the benchs to deploy
 benchs = YAML.load(File.read("expe_metadata.yaml"))["benchs"]
-
-NUM_PROCS = ARGV[0]
-RUNS = ARGV[1].to_i
 
 binaries = []
 log.info "compiling NAS bench with with TAU"
@@ -105,7 +105,7 @@ Net::SSH.start(nodes.first, 'root') do |ssh|
     binaries.each do |binary|
       log.info "Executing binary: #{binary}"
       mpi_cmd = "mpirun  --mca btl self,sm,tcp --machinefile machine_file #{binary}"
-      mpi_cmd = "mpirun  --allow-run-as-root --mca btl self,sm,tcp --machinefile machine_file #{binary}" if metadata["mpi_version"] == "1.8.5"
+      mpi_cmd = "mpirun  --allow-run-as-root --mca btl self,sm,tcp -npernode #{nper_node}--machinefile machine_file #{binary}" if metadata["mpi_version"] == "1.8.5"
       ssh.exec!(mpi_cmd)
       log.info "Getting the profile files"
       profile_dir = "profile-#{binary}-#{Time.now.to_i}"
