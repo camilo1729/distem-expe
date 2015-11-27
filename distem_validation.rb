@@ -11,6 +11,8 @@ raise "You must specify the number of nodes" if NB.nil?
 
 WALLTIME = ARGV[1].to_s || "2:00:00"
 
+no_deploy = ARGV[2].to_s
+
 ## getting experiment metadata
 metadata = YAML.load(File.read("expe_metadata.yaml"))
 job_name = metadata["job_name"]
@@ -73,7 +75,7 @@ KERNEL_VERSIONS.each do |kernel|
 
   jessie_env = "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml"
 
-  `ruby deploy_cluster.rb -n #{NB} -w #{WALLTIME} -e #{jessie_env}`
+  `ruby deploy_cluster.rb -n #{NB} -w #{WALLTIME} -e #{jessie_env}` if no_deploy.empty?
 
   log.info "Bench real multi activated" if BENCH_REAL_TEST
 
@@ -81,6 +83,23 @@ KERNEL_VERSIONS.each do |kernel|
   cores = CORES > 1 ? CORES : 1
 
   log.info "Experiments will run with #{num_machines} machines"
+
+
+  # choosing a Coordinator
+  coordinator = nodelist.first
+
+  log.info "Downloading necessary files"
+  expe_files = ["utils.rb","create_machinefile.rb","cluster_distem.rb","delete_cluster.rb","deploy_NAS_on_cluster.rb"]
+
+  Net::SCP.start(coordinator, "root") do |scp|
+
+    expe_files.each do |file|
+      `wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/#{file}`
+      scp.upload file, file
+    end
+    scp.upload "expe_metadata.yaml", "expe_metadata.yaml"
+  end
+
 
   num_machines.each do |num|
 
@@ -95,26 +114,12 @@ KERNEL_VERSIONS.each do |kernel|
 
   local_repository = "http://public.nancy.grid5000.fr/~cruizsanabria/distem.git"
 
-  coordinator = nodelist.first
-
   # now Install Distem into the nodes
   `ruby #{DISTEM_BOOTSTRAP_PATH}/distem-bootstrap -r "ruby-cute" -c #{coordinator} -g --debian-version jessie -f machine_file --git-url #{local_repository}`
 
   log.info "Deploying container cluster"
 
   `ruby build_lxc_cluster #{nodelist.first} #{CORES}`
-
-  log.info "Downloading necessary files"
-  expe_files = ["utils.rb","create_machinefile.rb","cluster_distem.rb","delete_cluster.rb","deploy_NAS_on_cluster.rb"]
-
-  Net::SCP.start(coordinator, "root") do |scp|
-
-    expe_files.each do |file|
-      `wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/#{file}`
-      scp.upload file, file
-    end
-    scp.upload "expe_metadata.yaml", "expe_metadata.yaml"
-  end
 
 
   Net::SSH.start(coordinator, 'root') do |ssh|
