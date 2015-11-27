@@ -18,6 +18,9 @@ DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
 RUNS = metadata["runs"]
 KERNEL_VERSIONS = metadata["kernel_versions"]
 CORES = metadata["container_cores"].to_i
+SITE = metadata["site"]
+CLUSTER = metadata["cluster"]
+
 
 # NUM_CONTAINERS = ARGV[1].to_i if metadata["multi_machine"] # it controls if we want to iterate with the benchmark
 BENCH_REAL_TEST = metadata["bench_real_test"]
@@ -35,21 +38,29 @@ g5k = Cute::G5K::API.new()
 #Reassigning the logger for capturing Grid'5000 API output
 g5k.logger = log
 
+g5k.logger = log
+
+# always take nodes on the same switch
+reserv_param = {:site => SITE,
+                :switches => 1+ NB/36,
+                :nodes => NB,
+                :cluster => CLUSTER,
+                :wait => false,
+                :walltime => WALLTIME,
+                :type => :deploy, :name => job_name,
+                :subnets => [18,1]}#,:vlan => :routed)
+
+# In case we have already a reservation
 old_jobs = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == job_name}
 
-raise "You need a job running" if old_jobs.empty?
+job = old_jobs.empty? ? g5k.reserve(reserv_param) : old_jobs.first
 
-job = old_jobs.first
-
-log.info "Downloading necessary scripts"
-
-`wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/deploy_cluster`
-`wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/deploy_NAS_on_cluster.rb`
-
-if metadata["multi_machine"] then
-  `wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/expe_NAS_distem_multi.rb`
-else
-  `wget -N https://raw.githubusercontent.com/camilo1729/distem-expe/master/expe_NAS_distem.rb`
+begin
+  job = g5k.wait_for_job(job, :wait_time => 7200)
+  log.info "Nodes assigned #{job['assigned_nodes']}"
+rescue  Cute::G5K::EventTimeout
+  log.info "We waited too long in site let's release the job and try in another site"
+  g5k.release(job)
 end
 
 nodelist = job['assigned_nodes'].uniq
