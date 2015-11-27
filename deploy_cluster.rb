@@ -33,9 +33,9 @@ optparse = OptionParser.new do |opts|
   end
 
 
-
 end
 
+optparse.parse!
 ## getting experiment metadata
 
 metadata = YAML.load(File.read("expe_metadata.yaml"))
