@@ -8,7 +8,7 @@ SOURCE_NAS =  "http://public.rennes.grid5000.fr/~cruizsanabria/NPB3.3.tar"
 ## getting experiment metadata
 metadata = YAML.load(File.read("expe_metadata.yaml"))
 
-NUM_PROCS = ARGV[0]
+NUM_PROCS = ARGV[0].to_i
 RUNS = ARGV[1].to_i
 
 log_file = File.open(metadata["log_file"], "a")
@@ -27,7 +27,7 @@ f.close
 # making nodes unique
 nodes.uniq!
 
-nper_node = NUM_PROCS/nodes.length
+nper_node = NUM_PROCS/(nodes.length)
 
 log.info "Downloading NAS if does not exist"
 `wget #{SOURCE_NAS} -O /tmp/NAS.tar`
