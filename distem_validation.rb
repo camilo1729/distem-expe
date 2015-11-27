@@ -75,7 +75,8 @@ KERNEL_VERSIONS.each do |kernel|
 
   jessie_env = "http://public.rennes.grid5000.fr/~cruizsanabria/jessie-distem-expe_k#{kernel}.yaml"
 
-  `ruby deploy_cluster.rb -n #{NB} -w #{WALLTIME} -e #{jessie_env}` if no_deploy.empty?
+  # the command below deploy an image and then installs a kernel
+  `ruby deploy_cluster.rb -n #{NB} -w #{WALLTIME} -e #{jessie_env} --kernel #{metadata["kernel_package"]}` if no_deploy.empty?
 
   log.info "Bench real multi activated" if BENCH_REAL_TEST
 
