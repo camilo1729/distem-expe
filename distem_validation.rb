@@ -73,13 +73,8 @@ KERNEL_VERSIONS.each do |kernel|
 
   num_machines.each do |num|
 
-    File.open("machine_file",'w+') do |f|
-      nodelist[0..(num-1)].each do |node|
-        cores.times{f.puts node }
-      end
-    end
-
     `ruby deploy_NAS_on_cluster.rb #{num*cores} #{RUNS}`
+
   end
 
   `mkdir -p real_k#{kernel}`
@@ -99,7 +94,7 @@ KERNEL_VERSIONS.each do |kernel|
   `ruby build_lxc_cluster #{nodelist.first} #{CORES}`
 
   log.info "Downloading necessary files"
-  expe_files = ["deploy_NAS_on_cluster.rb"]
+  expe_files = ["utils.rb","create_machinefile.rb","cluster_distem.rb","delete_cluster.rb","deploy_NAS_on_cluster.rb"]
 
   Net::SCP.start(coordinator, "root") do |scp|
 
@@ -115,10 +110,13 @@ KERNEL_VERSIONS.each do |kernel|
     log.info "printing kernel version"
     log.info ssh.exec!("uname -a")
     log.info "Verifying connectivity"
-    log.debug ssh.exec!("for i in $(cat machine_file); do ssh $i hostname; done")
-    lines = ssh.exec!("wc -l machine_file")
-    num_nodes = lines.split(" ").first
-    log.info ssh.exec!("ruby deploy_NAS_on_cluster.rb #{num_nodes} #{RUNS}")
+    num_machines.each do |num|
+      ssh.exec!("ruby create_machinefile.rb #{CORES} #{num}")
+      log.debug ssh.exec!("for i in $(cat machine_file); do ssh $i hostname; done")
+      lines = ssh.exec!("wc -l machine_file")
+      num_nodes = lines.split(" ").first
+      log.info ssh.exec!("ruby deploy_NAS_on_cluster.rb #{num_nodes*CORES} #{RUNS}")
+    end
   end
 
   log.info "Containers test finished"
