@@ -99,6 +99,12 @@ while not badnodes.empty? do
   badnodes = check_deployment(job["deploy"].last)
 end
 
+File.open("machine_file",'w+') do |f|
+  nodelist.each{ |node| f.puts node }
+end
+
+machinefile = File.absolute_path("machine_file")
+
 if options[:kernel]
   log.info "Installing new kernel"
   install_kernel(nodelist,metadata["kernel_package"])
@@ -124,11 +130,6 @@ if nodelist.length > options[:nodes] then
 end
 
 #  iplist = nodelist.map{|node| Resolv.getaddress node}
-
-File.open("machine_file",'w+') do |f|
-  nodelist.each{ |node| f.puts node }
-end
-
 
 key_dir = Dir.mktmpdir("keys")
 system "ssh-keygen -P \'\' -f #{key_dir}/keys"
