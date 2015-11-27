@@ -23,9 +23,16 @@ optparse = OptionParser.new do |opts|
     options[:user] = n
   end
 
+  opts.on('--kernel', String, 'Kernel package to install') do |n|
+    options[:kernel] = n
+  end
+
+
   opts.on('-e', '--env <environment>', String, 'Kadeploy environment') do |n|
     options[:env] = n || "jessie-x64-nfs"
   end
+
+
 
 end
 
@@ -90,6 +97,13 @@ while not badnodes.empty? do
   g5k.deploy(job,:nodes => badnodes, :env => options[:env])
   g5k.wait_for_deploy(job)
   badnodes = check_deployment(job["deploy"].last)
+end
+
+if options[:kernel]
+  log.info "Installing new kernel"
+  install_kernel(nodelist,metadata["kernel_package"])
+  log.info "rebooting nodes into the new kernel"
+  `kareboot3 -f #{machinefile} -l hard`
 end
 
 if metadata["performance_check"] then

@@ -32,13 +32,17 @@ class MultiIO
   end
 end
 
-def install_kernel(machines)
+def install_kernel(machines,file)
   Net::SSH::Multi.start do |session|
     # downloading debian package
     machines.each{ |node| session.use("root@#{node}")}
     # asking the user for debian package
     puts "Enter the name of the debian package to download:"
-    debian_package = STDIN.gets.chomp
+    if file.nil?
+      debian_package = STDIN.gets.chomp
+    else
+      debian_package = file
+    end
     puts "Downloading package: #{debian_package}"
     session.exec! "wget http://public.rennes.grid5000.fr/~cruizsanabria/#{debian_package}"
     session.exec! "dpkg -i #{debian_package}"
