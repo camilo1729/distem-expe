@@ -3,11 +3,13 @@ log_file: "Distem_expe.log"
 distem_bootstrap_path: "~/Repositories/ruby-cute/examples"
 lxc_image_path: "/home/cruizsanabria/jessie-tau-lxc.tar.gz"
 site: "rennes"
+job_name: "distem"
 cluster: "paravance"
 runs: 20
 timeout: false
 multi_machine: false
 performance_check: true
+kernel_package: ""
 kernel_versions:
 - "3.2"
 - "3.16"
