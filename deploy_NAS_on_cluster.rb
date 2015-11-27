@@ -105,7 +105,7 @@ Net::SSH.start(nodes.first, 'root') do |ssh|
     binaries.each do |binary|
       log.info "Executing binary: #{binary}"
       mpi_cmd = "mpirun  --mca btl self,sm,tcp --machinefile machine_file #{binary}"
-      mpi_cmd = "mpirun  --allow-run-as-root --mca btl self,sm,tcp -npernode #{nper_node}--machinefile machine_file #{binary}" if metadata["mpi_version"] == "1.8.5"
+      mpi_cmd = "mpirun  --allow-run-as-root --mca btl self,sm,tcp -npernode #{nper_node} --machinefile machine_file #{binary}" if metadata["mpi_version"] == "1.8.5"
       ssh.exec!(mpi_cmd)
       log.info "Getting the profile files"
       profile_dir = "profile-#{binary}-#{Time.now.to_i}"
