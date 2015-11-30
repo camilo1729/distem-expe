@@ -10,7 +10,7 @@ nbcores = 1 if nbcores < 1
 
 Distem.client do |cl|
 
-  info = cl.vnodes_info
+  info = cl.vnodes_info.values
 
   info.each do |vnode|
       iplist.push(cl.viface_info(vnode["name"],'if0')['address'].split('/')[0])
