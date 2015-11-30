@@ -19,11 +19,11 @@ optparse = OptionParser.new do |opts|
     options[:walltime] = n || "2:00:00"
   end
 
-  opts.on('--nodeploy', String, 'Sets the g5k user necessary to get the job') do |n|
-    options[:user] = n
+  opts.on('--nodeploy', String, 'No deploy') do |n|
+    options[:nodeploy] = n
   end
 
-  opts.on('--kernel', String, 'Kernel package to install') do |n|
+  opts.on('--kernel <package>', String, 'Kernel package to install') do |n|
     options[:kernel] = n
   end
 
