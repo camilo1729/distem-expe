@@ -88,7 +88,7 @@ KERNEL_VERSIONS.each do |kernel|
   coordinator = nodelist.first
 
   log.info "Downloading necessary files"
-  expe_files = ["utils.rb","create_machinefile.rb","cluster_distem.rb","delete_cluster.rb","deploy_NAS_on_cluster.rb"]
+  expe_files = ["utils.rb","deploy_NAS_on_cluster.rb","build_lxc_cluster.rb"]
 
   Net::SCP.start(coordinator, "root") do |scp|
 
@@ -118,7 +118,7 @@ KERNEL_VERSIONS.each do |kernel|
 
   log.info "Deploying container cluster"
 
-  `ruby build_lxc_cluster #{nodelist.first} #{CORES}`
+  `ruby build_lxc_cluster.rb #{nodelist.first} #{CORES}`
 
 
   Net::SSH.start(coordinator, 'root') do |ssh|
