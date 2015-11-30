@@ -59,7 +59,7 @@ Net::SCP.start(CORD, "root") do |scp|
     scp.upload file, file
   end
   scp.upload "expe_metadata.yaml", "expe_metadata.yaml"
-  scp.upload "create_charmfile.rb","create_charmfile.rb"
+#  scp.upload "create_charmfile.rb","create_charmfile.rb"
 end
 
 
