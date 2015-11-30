@@ -12,7 +12,7 @@ optparse = OptionParser.new do |opts|
 
   opts.on( '-n', '--nodes <number>',Integer,'Number of physical machines to deploy') do |n|
     raise "You have to specify the number of nodes" if n.nil?
-    options[:nodes] = n.to_i
+    options[:nodes] = n
   end
 
   opts.on('-w', '--walltime <time>', String, 'Walltime for the job') do |n|
@@ -89,12 +89,13 @@ g5k.deploy(job,:nodes => nodelist, :env => options[:env])
 g5k.wait_for_deploy(job)
 badnodes = g5k.check_deployment(job["deploy"].last)
 
+log.info "Error during deployment #{badnodes}" unless badnodes.empty?
 # redeploying for bad nodes
 while not badnodes.empty? do
   log.info "Redeploying nodes #{badnodes}"
   g5k.deploy(job,:nodes => badnodes, :env => options[:env])
   g5k.wait_for_deploy(job)
-  badnodes = check_deployment(job["deploy"].last)
+  badnodes = g5k.check_deployment(job["deploy"].last)
 end
 
 File.open("machine_file",'w+') do |f|
