@@ -40,8 +40,6 @@ g5k = Cute::G5K::API.new()
 #Reassigning the logger for capturing Grid'5000 API output
 g5k.logger = log
 
-g5k.logger = log
-
 # always take nodes on the same switch
 reserv_param = {:site => SITE,
                 :switches => 1+ NB/36,

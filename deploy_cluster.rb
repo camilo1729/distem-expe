@@ -27,11 +27,9 @@ optparse = OptionParser.new do |opts|
     options[:kernel] = n
   end
 
-
   opts.on('-e', '--env <environment>', String, 'Kadeploy environment') do |n|
     options[:env] = n || "jessie-x64-nfs"
   end
-
 
 end
 
@@ -85,7 +83,7 @@ nodelist = nodelist[0..(options[:nodes]-1)] # choosing the require amount of nod
 
 log.info "Running with #{options[:nodes]} nodes"
 
-log.info "Deploying environment: #{options[:nodes]}"
+log.info "Deploying environment: #{options[:env]}"
 
 g5k.deploy(job,:nodes => nodelist, :env => options[:env])
 g5k.wait_for_deploy(job)
