@@ -19,6 +19,7 @@ DISTEM_BOOTSTRAP_PATH=metadata["distem_bootstrap_path"]
 LXC_IMAGE_PATH = metadata["lxc_image_path"]
 RUNS = metadata["runs"]
 VNODES_TESTS = metadata["container_tests"]
+JOB_NAME = metadata["job_name"]
 
 log_file = File.open(metadata["log_file"], "a")
 log = Logger.new MultiIO.new(STDOUT, log_file)
@@ -31,7 +32,7 @@ g5k_api = {:uri => "https://api.grid5000.fr/",
 
 g5k = Cute::G5K::API.new(g5k_api)
 
-job = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == "distem"}.first
+job = g5k.get_my_jobs(g5k.site).select{ |j| j["name"] == JOB_NAME }.first
 
 # its an array like this:
 
