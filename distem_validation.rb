@@ -126,10 +126,11 @@ KERNEL_VERSIONS.each do |kernel|
     log.info ssh.exec!("uname -a")
     log.info "Verifying connectivity"
     num_machines.each do |num|
-      ssh.exec!("ruby create_machinefile.rb #{CORES} #{num}")
+      #just one line per node. The number of processes is then manage with the parameter --npernode of mpirun
+      ssh.exec!("ruby create_machinefile.rb 1 #{num}")
       log.debug ssh.exec!("for i in $(cat machine_file); do ssh $i hostname; done")
       lines = ssh.exec!("wc -l machine_file")
-      num_nodes = lines.split(" ").first
+      num_nodes = lines.split(" ").first.to_i
       log.info ssh.exec!("ruby deploy_NAS_on_cluster.rb #{num_nodes*CORES} #{RUNS}")
     end
   end
